@@ -1,35 +1,33 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   parse_cmd.c                                        :+:      :+:    :+:   */
+/*   parse_default.c                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: rvandepu <rvandepu@student.42lehavre.fr>   +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/10/08 21:19:35 by rvandepu          #+#    #+#             */
-/*   Updated: 2024/10/10 22:26:59 by rvandepu         ###   ########.fr       */
+/*   Created: 2024/10/10 21:33:25 by rvandepu          #+#    #+#             */
+/*   Updated: 2024/10/10 22:18:43 by rvandepu         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
 
-/*static bool	parse_redirect(t_parser *parser, char *cmdline)
-{
-	int i;
-}*/
-
-bool	parse_cmd(t_parser *parser, char **token)
+bool	parse_default(t_parser *parser, char **token)
 {
 	char	*cmdline;
 	int		i;
 
 	cmdline = *parser->cmdline;
 	i = 0;
-	while (is_whitespace(cmdline[i]))
+	while (cmdline[i] && !is_whitespace(cmdline[i]))
 		i++;
-	if (!cmdline[i])
+	if (!i)
 		return (true);
-	//if (cmdline[i] == '<' || cmdline[i] == '>')
-	//	parse_redirect();
+	*token = malloc(i + 1);
+	if (*token == NULL)
+		return (false);
 	*parser->cmdline += i;
-	return (sub_parser(parser, T_DEFAULT, token));
+	ft_memcpy(*token, cmdline, i);
+	(*token)[i] = '\0';
+	return (true);
 }

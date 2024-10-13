@@ -6,18 +6,18 @@
 /*   By: rvandepu <rvandepu@student.42lehavre.fr>   +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/08 21:14:57 by rvandepu          #+#    #+#             */
-/*   Updated: 2024/10/08 22:28:02 by rvandepu         ###   ########.fr       */
+/*   Updated: 2024/10/13 03:55:58 by rvandepu         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
 
-bool	invalid_parser(t_parser *parser, char **token);
+bool	invalid_parser(t_parser *parser, char **token) {return (false);}
 bool	parse_cmd(t_parser *parser, char **token);
 bool	parse_default(t_parser *parser, char **token);
-bool	parse_quote(t_parser *parser, char **token);
-bool	parse_doublequote(t_parser *parser, char **token);
-bool	parse_dollar(t_parser *parser, char **token);
+bool	parse_quote(t_parser *parser, char **token) {return (false);}
+bool	parse_doublequote(t_parser *parser, char **token) {return (false);}
+bool	parse_dollar(t_parser *parser, char **token) {return (false);}
 
 bool	parse_token(t_parser *parser, char **token)
 {
@@ -37,11 +37,12 @@ bool	parse_tokens(t_parser *parser, int depth)
 {
 	char	*token;
 
+	token = NULL;
 	if (!parse_token(parser, &token))
 		return (false);
 	if (token == NULL)
 	{
-		parser->tokens = ft_calloc(depth, sizeof(char *));
+		parser->tokens = ft_calloc(depth + 1, sizeof(char *));
 		if (parser->tokens == NULL)
 			return (false);
 		return (parser->count = depth, true);
@@ -63,10 +64,12 @@ t_cmd	*parse_cmdline(char *cmdline)
 	parser.cmdline = &cmdline;
 	if (!parse_tokens(&parser, 0))
 		return (NULL);
+	cmd.argc = parser.count;
+	cmd.argv = parser.tokens;
 	ret = malloc(sizeof(*ret));
-	if (ret == NULL)
-		return (ret);
-	return (*ret = cmd, ret);
+	if (ret)
+		*ret = cmd;
+	return (ret);
 }
 
 /*int	parse_cmdline(void)

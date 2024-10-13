@@ -6,7 +6,7 @@
 /*   By: rvandepu <rvandepu@student.42lehavre.fr>   +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/07 19:59:38 by rvandepu          #+#    #+#             */
-/*   Updated: 2024/10/08 22:49:28 by rvandepu         ###   ########.fr       */
+/*   Updated: 2024/10/10 21:39:05 by rvandepu         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -69,7 +69,7 @@ bool	parse_tokens(t_parser *parser, int depth);
 // parse_utils.c
 void	get_parser(t_parser *parser, t_parser *parent, t_token type);
 void	free_parser(t_parser *parser);
-void	skip_whitespace(char *str, int *i);
+bool	is_whitespace(char c);
 bool	sub_parser(t_parser *parent, t_token type, char **token);
 
 #endif

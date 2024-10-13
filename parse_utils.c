@@ -6,11 +6,21 @@
 /*   By: rvandepu <rvandepu@student.42lehavre.fr>   +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/08 21:14:02 by rvandepu          #+#    #+#             */
-/*   Updated: 2024/10/08 22:49:22 by rvandepu         ###   ########.fr       */
+/*   Updated: 2024/10/13 04:01:30 by rvandepu         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
+
+static void	print_args(t_parser *parser)
+{
+	int	i;
+
+	i = -1;
+	while (++i < parser->count)
+		ft_printf("'%s' ", parser->tokens[i]);
+	ft_printf("\n");
+}
 
 void	get_parser(t_parser *parser, t_parser *parent, t_token type)
 {
@@ -31,10 +41,9 @@ void	free_parser(t_parser *parser)
 	free(parser->tokens);
 }
 
-void	skip_whitespace(char *str, int *i)
+bool	is_whitespace(char c)
 {
-	while (str[*i] == ' ' || str[*i] == '\t')
-		(*i)++;
+	return (c == ' ' || c == '\t');
 }
 
 bool	sub_parser(t_parser *parent, t_token type, char **token)
@@ -43,21 +52,20 @@ bool	sub_parser(t_parser *parent, t_token type, char **token)
 	int			i;
 	int			len;
 
+	ft_printf("[sub_parser] creating context with type %d\n", type);
 	get_parser(&parser, parent, type);
 	if (!parse_tokens(&parser, 0))
 		return (false);
-	if (parser.count == 0) // TODO figure out where to check end of string
-		ft_printf("count is 0\n");
+	//if (parser.count == 0) // TODO figure out where to check end of string
+	//	ft_printf("count is 0\n");
+	ft_printf("[sub_parser] count %d: ", parser.count);
+	print_args(&parser);
 	i = 0;
 	len = 0;
 	while (i < parser.count)
 		len += ft_strlen(parser.tokens[i++]);
-	*token = malloc(len + 1);
-	if (*token == NULL)
-		return (free_parser(&parser), false);
-	i = 0;
-	while (i < parser.count)
-		ft_strlcat(*token, parser.tokens[i++], len);
+	*token = ft_strjoin(parser.count, parser.tokens);
+	ft_printf("[sub_parser] result token: '%s'\n", *token);
 	return (free_parser(&parser), true);
 }
 
