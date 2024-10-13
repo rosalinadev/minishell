@@ -6,7 +6,7 @@
 /*   By: rvandepu <rvandepu@student.42lehavre.fr>   +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/07 19:59:38 by rvandepu          #+#    #+#             */
-/*   Updated: 2024/10/10 21:39:05 by rvandepu         ###   ########.fr       */
+/*   Updated: 2024/10/13 07:00:23 by rvandepu         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -66,10 +66,13 @@ typedef struct s_parser
 // parser.c
 bool	parse_tokens(t_parser *parser, int depth);
 
-// parse_utils.c
+// parser_utils.c
 void	get_parser(t_parser *parser, t_parser *parent, t_token type);
 void	free_parser(t_parser *parser);
-bool	is_whitespace(char c);
 bool	sub_parser(t_parser *parent, t_token type, char **token);
+
+// parse_utils.c
+bool	is_whitespace(char c);
+char	*dup_token(char *src, int len);
 
 #endif

@@ -6,7 +6,7 @@
 /*   By: rvandepu <rvandepu@student.42lehavre.fr>   +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/08 21:14:57 by rvandepu          #+#    #+#             */
-/*   Updated: 2024/10/13 03:55:58 by rvandepu         ###   ########.fr       */
+/*   Updated: 2024/10/13 07:10:03 by rvandepu         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -52,6 +52,7 @@ bool	parse_tokens(t_parser *parser, int depth)
 	return (parser->tokens[depth] = token, true);
 }
 
+// TODO check this function's return
 t_cmd	*parse_cmdline(char *cmdline)
 {
 	t_cmd		cmd;
