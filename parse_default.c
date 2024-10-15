@@ -6,22 +6,21 @@
 /*   By: rvandepu <rvandepu@student.42lehavre.fr>   +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/10 21:33:25 by rvandepu          #+#    #+#             */
-/*   Updated: 2024/10/15 03:31:42 by rvandepu         ###   ########.fr       */
+/*   Updated: 2024/10/15 09:35:45 by rvandepu         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
 
 // TODO
-//#define DELIM " \t\'\"$"
-#define DELIM " \t\'$"
+#define DELIM " \t\'\"$"
 
 static bool	parse_quote(t_parser *parser, char **token)
 {
 	char	*cmdline;
 	int		i;
 
-	cmdline = ++(*parser->cmdline);
+	cmdline = ++*parser->cmdline;
 	i = 0;
 	while (cmdline[i] && cmdline[i] != '\'')
 		i++;
@@ -42,7 +41,10 @@ static bool	parse_special(t_parser *parser, char **token)
 		return (parse_quote(parser, token));
 	else if (**parser->cmdline == '$')
 		return (parse_var(parser, token));
-	return (true);
+	else if (**parser->cmdline == '"')
+		return (++*parser->cmdline, sub_parser(parser, T_DOUBLEQUOTE, token));
+	ft_printf("[parse_special] non-handled special\n");
+	return (false);
 }
 
 bool	parse_default(t_parser *parser, char **token)
@@ -52,7 +54,7 @@ bool	parse_default(t_parser *parser, char **token)
 
 	cmdline = *parser->cmdline;
 	i = 0;
-	if (ft_in(cmdline[i], DELIM) && !is_whitespace(cmdline[i]))
+	if (ft_in(cmdline[i], DELIM) && !ft_in(cmdline[i], WHITESPACE))
 		return (parse_special(parser, token));
 	while (cmdline[i] && !ft_in(cmdline[i], DELIM))
 		i++;

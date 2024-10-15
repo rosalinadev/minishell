@@ -6,7 +6,7 @@
 /*   By: rvandepu <rvandepu@student.42lehavre.fr>   +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/13 06:49:12 by rvandepu          #+#    #+#             */
-/*   Updated: 2024/10/13 06:49:57 by rvandepu         ###   ########.fr       */
+/*   Updated: 2024/10/15 10:35:58 by rvandepu         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -49,11 +49,11 @@ bool	sub_parser(t_parser *parent, t_token type, char **token)
 	get_parser(&parser, parent, type);
 	if (!parse_tokens(&parser, 0))
 		return (false);
-	//if (parser.count == 0) // TODO figure out where to check end of string
-	//	ft_printf("count is 0\n");
 	ft_printf("[sub_parser] count %d: ", parser.count);
 	print_args(&parser);
+	if (parser.type != T_DOUBLEQUOTE && parser.count == 0)
+		return (free_parser(&parser), true);
 	*token = ft_strjoin(parser.count, parser.tokens);
 	ft_printf("[sub_parser] result token: '%s'\n", *token);
-	return (free_parser(&parser), true);
+	return (free_parser(&parser), *token != NULL);
 }

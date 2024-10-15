@@ -6,7 +6,7 @@
 /*   By: rvandepu <rvandepu@student.42lehavre.fr>   +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/05 19:14:24 by rvandepu          #+#    #+#             */
-/*   Updated: 2024/10/13 11:25:09 by rvandepu         ###   ########.fr       */
+/*   Updated: 2024/10/15 09:53:54 by rvandepu         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -46,16 +46,17 @@ int	main(void)
 		ft_printf("%s\n", cmdline);
 		//ft_printf("[OhMyPKshell]$ %s\n", cmdline);
 		cmd = parse_cmdline(cmdline);
+		add_history(cmdline);
 		free(cmdline);
 		if (cmd == NULL)
 		{
 			ft_printf("error during parsing\n");
 			continue ;
 		}
-		cmdline = ft_strjoin(cmd->argc, cmd->argv);
+		//cmdline = ft_strjoin(cmd->argc, cmd->argv);
 		print_free_cmd(cmd);
-		ft_printf("%s\n", cmdline);
-		free(cmdline);
+		//ft_printf("%s\n", cmdline);
+		//free(cmdline);
 		if (should_exit)
 			return (EXIT_SUCCESS);
 	}

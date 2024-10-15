@@ -6,7 +6,7 @@
 /*   By: rvandepu <rvandepu@student.42lehavre.fr>   +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/07 19:59:38 by rvandepu          #+#    #+#             */
-/*   Updated: 2024/10/15 05:02:09 by rvandepu         ###   ########.fr       */
+/*   Updated: 2024/10/15 09:53:50 by rvandepu         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,7 +18,10 @@
 # include <unistd.h>
 # include <stdbool.h>
 # include <readline/readline.h>
+# include <readline/history.h>
 # include "libft.h"
+
+# define WHITESPACE " \t"
 
 typedef enum e_redirtype
 {
@@ -79,8 +82,10 @@ bool	parse_default(t_parser *parser, char **token);
 // parse_var.c
 bool	parse_var(t_parser *parser, char **token);
 
+// parse_doublequote.c
+bool	parse_doublequote(t_parser *parser, char **token);
+
 // parse_utils.c
-bool	is_whitespace(char c);
 char	*dup_token(char *src, int len);
 
 #endif

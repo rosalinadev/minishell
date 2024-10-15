@@ -6,26 +6,22 @@
 /*   By: rvandepu <rvandepu@student.42lehavre.fr>   +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/08 21:14:57 by rvandepu          #+#    #+#             */
-/*   Updated: 2024/10/15 05:02:04 by rvandepu         ###   ########.fr       */
+/*   Updated: 2024/10/15 10:41:02 by rvandepu         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
 
-bool	invalid_parser(t_parser *parser, char **token) {return (false);}
-bool	parse_cmd(t_parser *parser, char **token);
-bool	parse_default(t_parser *parser, char **token);
-bool	parse_doublequote(t_parser *parser, char **token) {return (false);}
-
 bool	parse_token(t_parser *parser, char **token)
 {
 	static bool	(*lookup[T__MAX])(t_parser *, char **) = {\
-		[T_INVALID] = invalid_parser, \
 		[T_CMD] = parse_cmd, \
 		[T_DEFAULT] = parse_default, \
 		[T_DOUBLEQUOTE] = parse_doublequote, \
 	};
 
+	if (!lookup[parser->type])
+		return (false);
 	return (lookup[parser->type](parser, token));
 }
 
