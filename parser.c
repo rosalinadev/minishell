@@ -6,7 +6,7 @@
 /*   By: rvandepu <rvandepu@student.42lehavre.fr>   +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/08 21:14:57 by rvandepu          #+#    #+#             */
-/*   Updated: 2024/10/13 07:10:03 by rvandepu         ###   ########.fr       */
+/*   Updated: 2024/10/15 05:02:04 by rvandepu         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,9 +15,7 @@
 bool	invalid_parser(t_parser *parser, char **token) {return (false);}
 bool	parse_cmd(t_parser *parser, char **token);
 bool	parse_default(t_parser *parser, char **token);
-bool	parse_quote(t_parser *parser, char **token) {return (false);}
 bool	parse_doublequote(t_parser *parser, char **token) {return (false);}
-bool	parse_dollar(t_parser *parser, char **token) {return (false);}
 
 bool	parse_token(t_parser *parser, char **token)
 {
@@ -25,9 +23,7 @@ bool	parse_token(t_parser *parser, char **token)
 		[T_INVALID] = invalid_parser, \
 		[T_CMD] = parse_cmd, \
 		[T_DEFAULT] = parse_default, \
-		[T_QUOTE] = parse_quote, \
 		[T_DOUBLEQUOTE] = parse_doublequote, \
-		[T_DOLLAR] = parse_dollar, \
 	};
 
 	return (lookup[parser->type](parser, token));

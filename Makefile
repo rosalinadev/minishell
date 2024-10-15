@@ -6,7 +6,7 @@
 #    By: rvandepu <rvandepu@student.42lehavre.fr>   +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/01/06 16:11:02 by rvandepu          #+#    #+#              #
-#    Updated: 2024/10/13 07:01:48 by rvandepu         ###   ########.fr        #
+#    Updated: 2024/10/15 03:19:15 by rvandepu         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -16,6 +16,7 @@ FILES := $(NAME).c \
 		 parser_utils.c \
 		 parse_cmd.c \
 		 parse_default.c \
+		 parse_var.c \
 		 parse_utils.c \
 
 OBJ := $(FILES:%.c=%.o)

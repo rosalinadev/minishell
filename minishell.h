@@ -6,7 +6,7 @@
 /*   By: rvandepu <rvandepu@student.42lehavre.fr>   +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/07 19:59:38 by rvandepu          #+#    #+#             */
-/*   Updated: 2024/10/13 07:00:23 by rvandepu         ###   ########.fr       */
+/*   Updated: 2024/10/15 05:02:09 by rvandepu         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -47,9 +47,7 @@ typedef enum e_token
 	T_INVALID = 0,
 	T_CMD,
 	T_DEFAULT,
-	T_QUOTE,
 	T_DOUBLEQUOTE,
-	T_DOLLAR,
 	T__MAX,
 }	t_token;
 
@@ -64,12 +62,22 @@ typedef struct s_parser
 }	t_parser;
 
 // parser.c
+bool	parse_token(t_parser *parser, char **token);
 bool	parse_tokens(t_parser *parser, int depth);
 
 // parser_utils.c
 void	get_parser(t_parser *parser, t_parser *parent, t_token type);
 void	free_parser(t_parser *parser);
 bool	sub_parser(t_parser *parent, t_token type, char **token);
+
+// parse_cmd.c
+bool	parse_cmd(t_parser *parser, char **token);
+
+// parse_default.c
+bool	parse_default(t_parser *parser, char **token);
+
+// parse_var.c
+bool	parse_var(t_parser *parser, char **token);
 
 // parse_utils.c
 bool	is_whitespace(char c);

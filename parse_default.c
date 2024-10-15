@@ -6,14 +6,15 @@
 /*   By: rvandepu <rvandepu@student.42lehavre.fr>   +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/10 21:33:25 by rvandepu          #+#    #+#             */
-/*   Updated: 2024/10/13 11:26:18 by rvandepu         ###   ########.fr       */
+/*   Updated: 2024/10/15 03:31:42 by rvandepu         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
 
+// TODO
 //#define DELIM " \t\'\"$"
-#define DELIM " \t\'"
+#define DELIM " \t\'$"
 
 static bool	parse_quote(t_parser *parser, char **token)
 {
@@ -39,8 +40,8 @@ static bool	parse_special(t_parser *parser, char **token)
 	ft_printf("[parse_special] found %c\n", **parser->cmdline);
 	if (**parser->cmdline == '\'')
 		return (parse_quote(parser, token));
-	else
-		(*parser->cmdline)++;
+	else if (**parser->cmdline == '$')
+		return (parse_var(parser, token));
 	return (true);
 }
 
