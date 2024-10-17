@@ -6,18 +6,45 @@
 /*   By: rvandepu <rvandepu@student.42lehavre.fr>   +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/08 21:19:35 by rvandepu          #+#    #+#             */
-/*   Updated: 2024/10/15 09:35:24 by rvandepu         ###   ########.fr       */
+/*   Updated: 2024/10/18 00:00:51 by rvandepu         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
 
-#define DELIM "|<>"
+#define REDIRECT "><"
 
-/*static bool	parse_redirect(t_parser *parser, char *cmdline)
+static bool	parse_redirect(t_parser *parser, bool is_output)
 {
-	int i;
-}*/
+	char	*cmdline;
+	int		i;
+	char	**token;
+
+	if (is_output)
+		token = &parser->out->filename;
+	else
+		token = &parser->in->filename;
+	cmdline = *parser->cmdline;
+	i = 0;
+	while (cmdline[i] && ft_in(cmdline[i], WHITESPACE))
+		i++;
+	return (false);
+}
+
+static bool	parse_redirects(t_parser *parser)
+{
+	if (**parser->cmdline == '<')
+		return (parse_redirect(parser, false));
+	else if (ft_strncmp(*parser->cmdline, "<<", 2) == 0)
+		return (parse_redirect(parser, false));
+	else if (ft_strncmp(*parser->cmdline, "<<-", 3) == 0)
+		return (parse_redirect(parser, false));
+	else if (**parser->cmdline == '>')
+		return (parse_redirect(parser, true));
+	else if (ft_strncmp(*parser->cmdline, ">>", 2) == 0)
+		return (parse_redirect(parser, true));
+	return (false);
+}
 
 bool	parse_cmd(t_parser *parser, char **token)
 {
@@ -28,10 +55,10 @@ bool	parse_cmd(t_parser *parser, char **token)
 	i = 0;
 	while (ft_in(cmdline[i], WHITESPACE))
 		i++;
-	if (!cmdline[i])
+	if (!cmdline[i] || cmdline[i] == '|')
 		return (true);
-	//if (ft_in(cmdline[i], DELIM))
-	//	return (parse_redirect());
+	else if (false && ft_in(cmdline[i], REDIRECT))
+		return (parse_redirects(parser));
 	*parser->cmdline += i;
 	return (sub_parser(parser, T_DEFAULT, token));
 }

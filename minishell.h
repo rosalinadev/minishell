@@ -6,7 +6,7 @@
 /*   By: rvandepu <rvandepu@student.42lehavre.fr>   +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/07 19:59:38 by rvandepu          #+#    #+#             */
-/*   Updated: 2024/10/15 09:53:50 by rvandepu         ###   ########.fr       */
+/*   Updated: 2024/10/17 23:14:52 by rvandepu         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,24 +23,24 @@
 
 # define WHITESPACE " \t"
 
-typedef enum e_redirtype
+typedef struct s_r_in
 {
-	R_UNKNOWN = 0,
-	R_INPUT,
-	R_HEREDOC,
-	R_OUTPUT,
-	R_APPEND,
-}	t_redirtype;
+	char	*filename;
+	bool	is_heredoc;
+	bool	hd_expand;
+	bool	hd_strip;
+}	t_r_in;
 
-typedef struct s_redir
+typedef struct s_r_out
 {
-	t_redirtype	type;
-	char		*filename;
-}	t_redir;
+	char	*filename;
+	bool	append;
+}	t_r_out;
 
 typedef struct s_cmd
 {
-	t_redir	redir[2];
+	t_r_in	in;
+	t_r_out	out;
 	int		argc;
 	char	**argv;
 }	t_cmd;
@@ -56,17 +56,27 @@ typedef enum e_token
 
 typedef struct s_parser
 {
-	struct s_parser	*parent;
-	t_redir			*redir;
-	char			**cmdline;
-	t_token			type;
-	int				count;
-	char			**tokens;
+	t_r_in	*in;
+	t_r_out	*out;
+	char	**cmdline;
+	t_token	type;
+	int		count;
+	char	**tokens;
 }	t_parser;
+
+typedef enum e_redirect
+{
+	R_IN,
+	R_HEREDOC,
+	R_HD_TRIM,
+	R_OUT,
+	R_APPEND
+}	t_redirect;
 
 // parser.c
 bool	parse_token(t_parser *parser, char **token);
 bool	parse_tokens(t_parser *parser, int depth);
+bool	parse_cmdline(t_cmd **ret, char *cmdline);
 
 // parser_utils.c
 void	get_parser(t_parser *parser, t_parser *parent, t_token type);

@@ -6,7 +6,7 @@
 /*   By: rvandepu <rvandepu@student.42lehavre.fr>   +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/08 21:14:57 by rvandepu          #+#    #+#             */
-/*   Updated: 2024/10/15 10:41:02 by rvandepu         ###   ########.fr       */
+/*   Updated: 2024/10/17 17:32:48 by rvandepu         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -45,24 +45,25 @@ bool	parse_tokens(t_parser *parser, int depth)
 }
 
 // TODO check this function's return
-t_cmd	*parse_cmdline(char *cmdline)
+bool	parse_cmdline(t_cmd **ret, char *cmdline)
 {
 	t_cmd		cmd;
 	t_parser	parser;
-	t_cmd		*ret;
 
 	cmd = (t_cmd){};
 	get_parser(&parser, NULL, T_CMD);
-	parser.redir = cmd.redir;
+	parser.in = &cmd.in;
+	parser.out = &cmd.out;
 	parser.cmdline = &cmdline;
 	if (!parse_tokens(&parser, 0))
-		return (NULL);
+		return (false);
 	cmd.argc = parser.count;
 	cmd.argv = parser.tokens;
-	ret = malloc(sizeof(*ret));
-	if (ret)
-		*ret = cmd;
-	return (ret);
+	*ret = malloc(sizeof(**ret));
+	if (*ret == NULL)
+		return (false);
+	**ret = cmd;
+	return (true);
 }
 
 /*int	parse_cmdline(void)
