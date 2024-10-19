@@ -6,7 +6,7 @@
 /*   By: rvandepu <rvandepu@student.42lehavre.fr>   +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/08 21:14:57 by rvandepu          #+#    #+#             */
-/*   Updated: 2024/10/17 17:32:48 by rvandepu         ###   ########.fr       */
+/*   Updated: 2024/10/19 15:05:02 by rvandepu         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -52,8 +52,7 @@ bool	parse_cmdline(t_cmd **ret, char *cmdline)
 
 	cmd = (t_cmd){};
 	get_parser(&parser, NULL, T_CMD);
-	parser.in = &cmd.in;
-	parser.out = &cmd.out;
+	parser.redir = cmd.redir;
 	parser.cmdline = &cmdline;
 	if (!parse_tokens(&parser, 0))
 		return (false);

@@ -6,20 +6,22 @@
 /*   By: rvandepu <rvandepu@student.42lehavre.fr>   +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/10 21:33:25 by rvandepu          #+#    #+#             */
-/*   Updated: 2024/10/17 17:49:35 by rvandepu         ###   ########.fr       */
+/*   Updated: 2024/10/19 16:03:07 by rvandepu         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
 
 // TODO
-#define DELIM " \t\'\"$"
+#define DELIM " \t\'\"$<>|"
 
 static bool	parse_quote(t_parser *parser, char **token)
 {
 	char	*cmdline;
 	int		i;
 
+	if (parser->parsing_redir)
+		parser->parsing_redir->quoted = true;
 	cmdline = ++*parser->cmdline;
 	i = 0;
 	while (cmdline[i] && cmdline[i] != '\'')
@@ -43,6 +45,10 @@ static bool	parse_special(t_parser *parser, char **token)
 		return (parse_var(parser, token));
 	else if (**parser->cmdline == '"')
 		return (++*parser->cmdline, sub_parser(parser, T_DOUBLEQUOTE, token));
+	else if (**parser->cmdline == '<' || **parser->cmdline == '>')
+		return (true);
+	else if (**parser->cmdline == '|')
+		return (true);
 	ft_printf("[parse_special] non-handled special\n");
 	return (false);
 }

@@ -6,7 +6,7 @@
 /*   By: rvandepu <rvandepu@student.42lehavre.fr>   +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/07 19:59:38 by rvandepu          #+#    #+#             */
-/*   Updated: 2024/10/17 23:14:52 by rvandepu         ###   ########.fr       */
+/*   Updated: 2024/10/19 15:29:44 by rvandepu         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,24 +23,17 @@
 
 # define WHITESPACE " \t"
 
-typedef struct s_r_in
+typedef struct s_redir
 {
 	char	*filename;
 	bool	is_heredoc;
-	bool	hd_expand;
-	bool	hd_strip;
-}	t_r_in;
-
-typedef struct s_r_out
-{
-	char	*filename;
+	bool	quoted;
 	bool	append;
-}	t_r_out;
+}	t_redir;
 
 typedef struct s_cmd
 {
-	t_r_in	in;
-	t_r_out	out;
+	t_redir	redir[2];
 	int		argc;
 	char	**argv;
 }	t_cmd;
@@ -56,22 +49,13 @@ typedef enum e_token
 
 typedef struct s_parser
 {
-	t_r_in	*in;
-	t_r_out	*out;
+	t_redir	*redir;
+	t_redir	*parsing_redir;
 	char	**cmdline;
 	t_token	type;
 	int		count;
 	char	**tokens;
 }	t_parser;
-
-typedef enum e_redirect
-{
-	R_IN,
-	R_HEREDOC,
-	R_HD_TRIM,
-	R_OUT,
-	R_APPEND
-}	t_redirect;
 
 // parser.c
 bool	parse_token(t_parser *parser, char **token);

@@ -6,7 +6,7 @@
 /*   By: rvandepu <rvandepu@student.42lehavre.fr>   +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/08 21:19:35 by rvandepu          #+#    #+#             */
-/*   Updated: 2024/10/18 00:00:51 by rvandepu         ###   ########.fr       */
+/*   Updated: 2024/10/19 15:59:40 by rvandepu         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,35 +14,36 @@
 
 #define REDIRECT "><"
 
-static bool	parse_redirect(t_parser *parser, bool is_output)
+static bool	parse_redirect(t_parser *parser, t_redir *redir)
 {
-	char	*cmdline;
-	int		i;
-	char	**token;
-
-	if (is_output)
-		token = &parser->out->filename;
-	else
-		token = &parser->in->filename;
-	cmdline = *parser->cmdline;
-	i = 0;
-	while (cmdline[i] && ft_in(cmdline[i], WHITESPACE))
-		i++;
-	return (false);
+	while (**parser->cmdline && ft_in(**parser->cmdline, WHITESPACE))
+		++*parser->cmdline;
+	parser->parsing_redir = redir;
+	if (!sub_parser(parser, T_DEFAULT, &redir->filename)
+		|| redir->filename == NULL)
+		return (false);
+	parser->parsing_redir = NULL;
+	return (true);
 }
 
 static bool	parse_redirects(t_parser *parser)
 {
 	if (**parser->cmdline == '<')
-		return (parse_redirect(parser, false));
-	else if (ft_strncmp(*parser->cmdline, "<<", 2) == 0)
-		return (parse_redirect(parser, false));
-	else if (ft_strncmp(*parser->cmdline, "<<-", 3) == 0)
-		return (parse_redirect(parser, false));
+	{
+		parser->redir[0] = (free(parser->redir[0].filename), (t_redir){});
+		if ((*parser->cmdline)[1] == '<')
+			return (*parser->cmdline += 2, parser->redir[0].is_heredoc = true,
+				parse_redirect(parser, &parser->redir[0]));
+		return (++*parser->cmdline, parse_redirect(parser, &parser->redir[0]));
+	}
 	else if (**parser->cmdline == '>')
-		return (parse_redirect(parser, true));
-	else if (ft_strncmp(*parser->cmdline, ">>", 2) == 0)
-		return (parse_redirect(parser, true));
+	{
+		parser->redir[1] = (free(parser->redir[1].filename), (t_redir){});
+		if ((*parser->cmdline)[1] == '>')
+			return (*parser->cmdline += 2, parser->redir[1].append = true,
+				parse_redirect(parser, &parser->redir[1]));
+		return (++*parser->cmdline, parse_redirect(parser, &parser->redir[1]));
+	}
 	return (false);
 }
 
@@ -57,8 +58,8 @@ bool	parse_cmd(t_parser *parser, char **token)
 		i++;
 	if (!cmdline[i] || cmdline[i] == '|')
 		return (true);
-	else if (false && ft_in(cmdline[i], REDIRECT))
-		return (parse_redirects(parser));
 	*parser->cmdline += i;
+	if (ft_in(cmdline[i], REDIRECT))
+		return (parse_redirects(parser));
 	return (sub_parser(parser, T_DEFAULT, token));
 }

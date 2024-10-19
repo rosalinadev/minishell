@@ -6,7 +6,7 @@
 /*   By: rvandepu <rvandepu@student.42lehavre.fr>   +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/05 19:14:24 by rvandepu          #+#    #+#             */
-/*   Updated: 2024/10/17 17:23:49 by rvandepu         ###   ########.fr       */
+/*   Updated: 2024/10/19 16:00:29 by rvandepu         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,10 +19,16 @@ static void	print_free_cmd(t_cmd *cmd)
 	i = 0;
 	while (i < cmd->argc)
 	{
-		printf("%3d: '%s'\n", i, cmd->argv[i]);
+		ft_printf("%3d: '%s'\n", i, cmd->argv[i]);
 		free(cmd->argv[i++]);
 	}
 	free(cmd->argv);
+	ft_printf("in: %s\n\tis_heredoc:%d\n\tquoted:%d\n", cmd->redir[0].filename,
+		cmd->redir[0].is_heredoc, cmd->redir[0].quoted);
+	ft_printf("out: %s\n\tappend:%d\n", cmd->redir[1].filename,
+		cmd->redir[1].append);
+	free(cmd->redir[0].filename);
+	free(cmd->redir[1].filename);
 	free(cmd);
 }
 

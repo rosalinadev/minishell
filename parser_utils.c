@@ -6,7 +6,7 @@
 /*   By: rvandepu <rvandepu@student.42lehavre.fr>   +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/13 06:49:12 by rvandepu          #+#    #+#             */
-/*   Updated: 2024/10/17 14:29:54 by rvandepu         ###   ########.fr       */
+/*   Updated: 2024/10/19 15:58:32 by rvandepu         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,12 +26,10 @@ void	get_parser(t_parser *parser, t_parser *parent, t_token type)
 {
 	*parser = (t_parser){};
 	if (parent)
-	{
-		parser->in = parent->in;
-		parser->out = parent->out;
-		parser->cmdline = parent->cmdline;
-	}
+		*parser = *parent;
 	parser->type = type;
+	parser->count = 0;
+	parser->tokens = NULL;
 }
 
 void	free_parser(t_parser *parser)
