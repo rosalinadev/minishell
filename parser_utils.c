@@ -6,7 +6,7 @@
 /*   By: rvandepu <rvandepu@student.42lehavre.fr>   +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/13 06:49:12 by rvandepu          #+#    #+#             */
-/*   Updated: 2024/10/21 17:53:12 by rvandepu         ###   ########.fr       */
+/*   Updated: 2024/10/22 23:25:01 by rvandepu         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -77,7 +77,7 @@ bool	sub_parser(t_parser *parent, t_token type, char **token)
 	ft_printf("[sub_parser] count %d: ", parser.count);
 	print_args(&parser);
 	if (parser.type != T_DOUBLEQUOTE && parser.count == 0)
-		return (free_parser(&parser), true);
+		return (free_parser(&parser), parent->has_skipped = true, true);
 	*token = ft_strjoin(parser.count, parser.tokens);
 	ft_printf("[sub_parser] result token: '%s'\n", *token);
 	return (free_parser(&parser), *token != NULL);
