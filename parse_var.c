@@ -6,7 +6,7 @@
 /*   By: rvandepu <rvandepu@student.42lehavre.fr>   +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/15 02:42:42 by rvandepu          #+#    #+#             */
-/*   Updated: 2024/10/15 05:13:06 by rvandepu         ###   ########.fr       */
+/*   Updated: 2024/10/20 16:13:02 by rvandepu         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -45,6 +45,6 @@ bool	parse_var(t_parser *parser, char **token)
 	cmdline[i] = c;
 	*parser->cmdline += i;
 	if (var == NULL)
-		return (parse_token(parser, token));
+		return (parser->has_skipped = true, true);
 	return ((bool)(*token = ft_strdup(var)));
 }

@@ -6,7 +6,7 @@
 /*   By: rvandepu <rvandepu@student.42lehavre.fr>   +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/08 21:19:35 by rvandepu          #+#    #+#             */
-/*   Updated: 2024/10/19 15:59:40 by rvandepu         ###   ########.fr       */
+/*   Updated: 2024/10/21 17:49:54 by rvandepu         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,6 +23,7 @@ static bool	parse_redirect(t_parser *parser, t_redir *redir)
 		|| redir->filename == NULL)
 		return (false);
 	parser->parsing_redir = NULL;
+	parser->has_skipped = true;
 	return (true);
 }
 
@@ -47,6 +48,7 @@ static bool	parse_redirects(t_parser *parser)
 	return (false);
 }
 
+// NOTE: recursion here causes a stack overflow between 50k-100k redirects
 bool	parse_cmd(t_parser *parser, char **token)
 {
 	char	*cmdline;
@@ -56,9 +58,9 @@ bool	parse_cmd(t_parser *parser, char **token)
 	i = 0;
 	while (ft_in(cmdline[i], WHITESPACE))
 		i++;
+	*parser->cmdline += i;
 	if (!cmdline[i] || cmdline[i] == '|')
 		return (true);
-	*parser->cmdline += i;
 	if (ft_in(cmdline[i], REDIRECT))
 		return (parse_redirects(parser));
 	return (sub_parser(parser, T_DEFAULT, token));

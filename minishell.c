@@ -6,37 +6,45 @@
 /*   By: rvandepu <rvandepu@student.42lehavre.fr>   +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/05 19:14:24 by rvandepu          #+#    #+#             */
-/*   Updated: 2024/10/19 16:00:29 by rvandepu         ###   ########.fr       */
+/*   Updated: 2024/10/22 20:53:54 by rvandepu         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
 
-static void	print_free_cmd(t_cmd *cmd)
+static void	print_free_cmds(t_cmd **cmds)
 {
-	int	i;
+	int		i;
+	int		j;
 
 	i = 0;
-	while (i < cmd->argc)
+	while (cmds[i])
 	{
-		ft_printf("%3d: '%s'\n", i, cmd->argv[i]);
-		free(cmd->argv[i++]);
+		ft_printf("====================\n%10d\n====================\n", i);
+		if (cmds[i]->argc == 0)
+			ft_printf("(no arguments to print)\n");
+		j = 0;
+		while (j < cmds[i]->argc)
+		{
+			ft_printf("%3d: '%s'\n", j, cmds[i]->argv[j]);
+			j++;
+		}
+		ft_printf("in: %s\n\tis_heredoc:%d\n\tquoted:%d\n",
+			cmds[i]->redir[0].filename, cmds[i]->redir[0].is_heredoc,
+			cmds[i]->redir[0].quoted);
+		ft_printf("out: %s\n\tappend:%d\n", cmds[i]->redir[1].filename,
+			cmds[i]->redir[1].append);
+		free_cmd(cmds[i], true);
+		i++;
 	}
-	free(cmd->argv);
-	ft_printf("in: %s\n\tis_heredoc:%d\n\tquoted:%d\n", cmd->redir[0].filename,
-		cmd->redir[0].is_heredoc, cmd->redir[0].quoted);
-	ft_printf("out: %s\n\tappend:%d\n", cmd->redir[1].filename,
-		cmd->redir[1].append);
-	free(cmd->redir[0].filename);
-	free(cmd->redir[1].filename);
-	free(cmd);
+	free(cmds);
 }
 
 int	main(void)
 {
 	char	*cmdline;
 	bool	should_exit;
-	t_cmd	*cmd;
+	t_cmd	**cmds;
 
 	while (true)
 	{
@@ -49,7 +57,7 @@ int	main(void)
 		ft_printf("%s\n", cmdline);
 		//ft_printf("[OhMyPKshell]$ %s\n", cmdline);
 		add_history(cmdline);
-		if (!parse_cmdline(&cmd, cmdline))
+		if (!parse_cmdline(&cmds, cmdline, 0))
 		{
 			ft_printf("error during parsing\n");
 			free(cmdline);
@@ -57,7 +65,7 @@ int	main(void)
 		}
 		free(cmdline);
 		//cmdline = ft_strjoin(cmd->argc, cmd->argv);
-		print_free_cmd(cmd);
+		print_free_cmds(cmds);
 		//ft_printf("%s\n", cmdline);
 		//free(cmdline);
 		if (should_exit)
