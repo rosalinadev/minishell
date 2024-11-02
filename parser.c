@@ -6,7 +6,7 @@
 /*   By: rvandepu <rvandepu@student.42lehavre.fr>   +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/08 21:14:57 by rvandepu          #+#    #+#             */
-/*   Updated: 2024/10/21 18:59:12 by rvandepu         ###   ########.fr       */
+/*   Updated: 2024/11/01 22:21:52 by rvandepu         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -52,14 +52,14 @@ bool	parse_tokens(t_parser *parser, int depth)
 	return (parser->tokens[depth] = token, true);
 }
 
-// TODO check this function's return
-static bool	parse_command(t_cmd **ret, char **cmdline)
+static bool	parse_command(t_ctx *ctx, t_cmd **ret, char **cmdline)
 {
 	t_cmd		cmd;
 	t_parser	parser;
 
 	cmd = (t_cmd){};
 	get_parser(&parser, NULL, T_CMD);
+	parser.ctx = ctx;
 	parser.redir = cmd.redir;
 	parser.cmdline = cmdline;
 	if (!parse_tokens(&parser, 0))
@@ -73,7 +73,7 @@ static bool	parse_command(t_cmd **ret, char **cmdline)
 	return (true);
 }
 
-int	parse_cmdline(t_cmd ***ret, char *cmdline, int depth)
+int	parse_cmdline(t_ctx *ctx, char *cmdline, int depth)
 {
 	static bool	was_pipe = false;
 	t_cmd		*cmd;
@@ -87,15 +87,15 @@ int	parse_cmdline(t_cmd ***ret, char *cmdline, int depth)
 	{
 		if (was_pipe)
 			return (false);
-		*ret = ft_calloc(depth + 1, sizeof(t_cmd *));
-		if (*ret == NULL)
+		ctx->cmds = ft_calloc(depth + 1, sizeof(t_cmd *));
+		if (ctx->cmds == NULL)
 			return (false);
 		return (true);
 	}
-	if (!parse_command(&cmd, &cmdline))
+	if (!parse_command(ctx, &cmd, &cmdline))
 		return (false);
 	was_pipe = (*cmdline == '|') && (cmdline++, true);
-	if (!parse_cmdline(ret, cmdline, depth + 1))
+	if (!parse_cmdline(ctx, cmdline, depth + 1))
 		return (free_cmd(cmd, true), false);
-	return ((*ret)[depth] = cmd, true);
+	return (ctx->cmds[depth] = cmd, true);
 }

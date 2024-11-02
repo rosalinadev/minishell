@@ -6,7 +6,7 @@
 /*   By: rvandepu <rvandepu@student.42lehavre.fr>   +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/07 19:59:38 by rvandepu          #+#    #+#             */
-/*   Updated: 2024/10/21 18:16:59 by rvandepu         ###   ########.fr       */
+/*   Updated: 2024/11/01 23:03:00 by rvandepu         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,6 +20,7 @@
 # include <readline/readline.h>
 # include <readline/history.h>
 # include "libft.h"
+# include "env.h"
 
 # define WHITESPACE " \t"
 
@@ -38,6 +39,13 @@ typedef struct s_cmd
 	char	**argv;
 }	t_cmd;
 
+typedef struct s_ctx
+{
+	t_env	*env;
+	t_cmd	**cmds;
+	int		exitcode;
+}	t_ctx;
+
 typedef enum e_token
 {
 	T_INVALID = 0,
@@ -49,6 +57,7 @@ typedef enum e_token
 
 typedef struct s_parser
 {
+	t_ctx	*ctx;
 	t_redir	*redir;
 	t_redir	*parsing_redir;
 	char	**cmdline;
@@ -60,7 +69,7 @@ typedef struct s_parser
 
 // parser.c
 bool	parse_tokens(t_parser *parser, int depth);
-int		parse_cmdline(t_cmd ***ret, char *cmdline, int depth);
+int		parse_cmdline(t_ctx *ctx, char *cmdline, int depth);
 
 // parser_utils.c
 void	free_cmd(t_cmd *cmd, bool free_struct);

@@ -6,15 +6,13 @@
 /*   By: rvandepu <rvandepu@student.42lehavre.fr>   +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/15 02:42:42 by rvandepu          #+#    #+#             */
-/*   Updated: 2024/10/20 16:13:02 by rvandepu         ###   ########.fr       */
+/*   Updated: 2024/11/02 01:40:14 by rvandepu         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
 
 // TODO get env from proxy env
-// TODO get exit code from somewhere
-#define EXITCODE 42
 
 /* Okay so, about the lines like this one:
  *     return ((bool)(*token = ft_strdup("$")));
@@ -34,14 +32,15 @@ bool	parse_var(t_parser *parser, char **token)
 	i = 0;
 	is_invalid_name = ft_isdigit(cmdline[i]);
 	if (cmdline[i] == '?')
-		return (++*parser->cmdline, (bool)(*token = ft_itoa(EXITCODE)));
+		return (++*parser->cmdline,
+			(bool)(*token = ft_itoa(parser->ctx->exitcode)));
 	while (ft_isalnum(cmdline[i]) || cmdline[i] == '_')
 		i++;
 	if (i == 0 || is_invalid_name)
 		return ((bool)(*token = ft_strdup("$")));
 	c = cmdline[i];
 	cmdline[i] = '\0';
-	var = getenv(cmdline);
+	var = env_get(parser->ctx->env, cmdline);
 	cmdline[i] = c;
 	*parser->cmdline += i;
 	if (var == NULL)
