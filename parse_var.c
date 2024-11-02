@@ -6,13 +6,11 @@
 /*   By: rvandepu <rvandepu@student.42lehavre.fr>   +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/15 02:42:42 by rvandepu          #+#    #+#             */
-/*   Updated: 2024/11/02 01:40:14 by rvandepu         ###   ########.fr       */
+/*   Updated: 2024/11/02 06:25:20 by rvandepu         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
-
-// TODO get env from proxy env
 
 /* Okay so, about the lines like this one:
  *     return ((bool)(*token = ft_strdup("$")));

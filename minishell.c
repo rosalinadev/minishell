@@ -6,7 +6,7 @@
 /*   By: rvandepu <rvandepu@student.42lehavre.fr>   +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/05 19:14:24 by rvandepu          #+#    #+#             */
-/*   Updated: 2024/11/02 02:09:59 by rvandepu         ###   ########.fr       */
+/*   Updated: 2024/11/02 06:33:01 by rvandepu         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,6 +21,7 @@ static void	print_cmds(t_cmd **cmds)
 	while (cmds[i])
 	{
 		ft_printf("====================\n%10d\n====================\n", i);
+		ft_printf("argc: %d\nargv:\n", cmds[i]->argc);
 		if (cmds[i]->argc == 0)
 			ft_printf("(no arguments to print)\n");
 		j = 0;
@@ -56,17 +57,19 @@ static void	handle_cmds(t_ctx *ctx)
 			str = env_get(ctx->env, cmd->argv[1]);
 			ft_printf("[export] str: %p %d\n", str, str == NULL);
 			str = ft_strjoinv(3 - (str == NULL), cmd->argv[1], "=", str);
+			if (str == NULL)
+				return ;
 			free(cmd->argv[1]);
 			cmd->argv[1] = str;
 		}
-		if (!env_set(&ctx->env, cmd->argv[1], false))
+		if (!env_set(&ctx->env, cmd->argv[1]))
 			return (env_clear(&ctx->env));
 	}
 	else if (ft_strcmp(cmd->argv[0], "unset") == 0)
 	{
 		if (cmd->argc < 2)
 			return ;
-		env_set(&ctx->env, cmd->argv[1], true);
+		env_del(&ctx->env, cmd->argv[1]);
 	}
 	else if (ft_strcmp(cmd->argv[0], "env") == 0)
 	{
@@ -82,7 +85,7 @@ static void	handle_cmds(t_ctx *ctx)
 		char	**env = env_environ(ctx->env);
 		ft_printf("[environ] env: %p\n", env);
 		if (!env)
-			return ; // TODO handle
+			return ; // TODO malloc fail
 		int	i = 0;
 		while (env[i])
 		{
