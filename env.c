@@ -6,41 +6,16 @@
 /*   By: rvandepu <rvandepu@student.42lehavre.fr>   +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/01 23:04:18 by rvandepu          #+#    #+#             */
-/*   Updated: 2024/11/02 02:06:50 by rvandepu         ###   ########.fr       */
+/*   Updated: 2024/11/02 06:23:03 by rvandepu         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "env.h"
 
-// TODO move to main and merge utils here?
-bool	env_init(t_env **env, char **environ)
+bool	env_set(t_env **env, char *var)
 {
-	while (*environ)
-	{
-		ft_printf("[env_init] var (trunc): %.40s\n", *environ);
-		if (!env_set(env, *environ, false))
-			return (env_clear(env), false);
-		environ++;
-	}
-	return (true);
-}
-
-bool	env_set(t_env **env, char *var, bool del)
-{
-	t_env	*next;
-
 	while (*env && _env_namecmp(var, (*env)->var) != 0)
 		env = &(*env)->next;
-	if (del)
-	{
-		ft_printf("[env_set] deleting var (trunc): %.40s\n", var);
-		if (*env)
-			free((*env)->var);
-		next = (*env)->next;
-		free(*env);
-		*env = next;
-		return (true);
-	}
 	var = ft_strdup(var);
 	if (var == NULL)
 		return (false);
@@ -62,6 +37,22 @@ bool	env_set(t_env **env, char *var, bool del)
 	return (true);
 }
 
+bool	env_del(t_env **env, char *name)
+{
+	t_env	*next;
+
+	while (*env && _env_namecmp(name, (*env)->var) != 0)
+		env = &(*env)->next;
+	if (*env == NULL)
+		return (ft_printf("[env_del] var not found: %.40s\n", name), false);
+	ft_printf("[env_del] deleting var (trunc): %.40s\n", name);
+	next = (*env)->next;
+	free((*env)->var);
+	free(*env);
+	*env = next;
+	return (true);
+}
+
 char	*env_get(t_env *env, char *name)
 {
 	while (env && _env_namecmp(name, env->var) != 0)
@@ -69,19 +60,6 @@ char	*env_get(t_env *env, char *name)
 	if (env)
 		return (env->val);
 	return (NULL);
-}
-
-void	env_clear(t_env **env)
-{
-	t_env	*next;
-
-	while (*env)
-	{
-		next = (*env)->next;
-		free((*env)->var);
-		free(*env);
-		*env = next;
-	}
 }
 
 char	**env_environ(t_env *start)
