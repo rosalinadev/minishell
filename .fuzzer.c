@@ -1,18 +1,20 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   minishell.c                                        :+:      :+:    :+:   */
+/*   .fuzzer.c                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: rvandepu <rvandepu@student.42lehavre.fr>   +#+  +:+       +#+        */
+/*   By: aboyreau <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/10/05 19:14:24 by rvandepu          #+#    #+#             */
-/*   Updated: 2024/11/03 13:20:50 by aboyreau         ###   ########.fr       */
+/*   Created: 2024/11/03 13:16:39 by aboyreau          #+#    #+#             */
+/*   Updated: 2024/11/03 13:16:39 by aboyreau         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
+#include "libft.h"
 #include "minishell.h"
+#include <stdint.h>
 
-static void	print_cmds(t_cmd **cmds)
+void	print_cmds(t_cmd **cmds)
 {
 	int		i;
 	int		j;
@@ -39,7 +41,7 @@ static void	print_cmds(t_cmd **cmds)
 	}
 }
 
-static void	handle_cmds(t_ctx *ctx)
+void	handle_cmds(t_ctx *ctx)
 {
 	t_cmd	*cmd;
 	t_env	*var;
@@ -108,41 +110,36 @@ static void	free_cmds(t_cmd **cmds)
 	free(cmds);
 }
 
-bool	loop(t_ctx *ctx)
+
+#define PERFECT 42
+int	LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 {
 	char	*cmdline;
-	bool	should_exit;
-
-	while (true)
-	{
-		cmdline = readline("[OhMyPKshell]$ ");
-		if (!cmdline)
-			return (true);
-		should_exit = !ft_strcmp(cmdline, "exit");
-		ft_printf("%s\n", cmdline);
-		add_history(cmdline);
-		if (!parse_cmdline(ctx, cmdline, 0))
-		{
-			ft_printf("error during parsing\n");
-			free(cmdline);
-			continue ;
-		}
-		free(cmdline);
-		print_cmds(ctx->cmds);
-		handle_cmds(ctx);
-		free_cmds(ctx->cmds);
-		if (should_exit)
-			return (true);
-	}
-}
-
-int	main(void)
-{
 	t_ctx	ctx;
 
-	ctx = (t_ctx){.exitcode = 42};
+	ctx = (t_ctx){.exitcode = PERFECT};
 	env_init(&ctx.env, environ);
-	if (!loop(&ctx))
-		return (env_clear(&ctx.env), EXIT_FAILURE);
-	return (env_clear(&ctx.env), EXIT_SUCCESS);
+
+	cmdline = calloc(size + 1, sizeof(char));
+	size_t i;
+	for (i = 0; i < size; i++)
+	{
+		cmdline[i] = (char) data[i];
+	}
+	cmdline[i] = '\0';
+	if (!cmdline)
+		return (true);
+	// should_exit = !ft_strcmp(cmdline, "exit");
+	add_history(cmdline);
+	if (!parse_cmdline(&ctx, cmdline, 0))
+	{
+		ft_printf("error during parsing\n");
+		env_clear(&ctx.env);
+		free(cmdline);
+		return EXIT_SUCCESS;
+	}
+	free_cmds(ctx.cmds);
+	env_clear(&ctx.env);
+	free(cmdline);
+	return EXIT_SUCCESS;
 }
