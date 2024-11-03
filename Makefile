@@ -6,7 +6,7 @@
 #    By: rvandepu <rvandepu@student.42lehavre.fr>   +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/01/06 16:11:02 by rvandepu          #+#    #+#              #
-#    Updated: 2024/11/02 00:47:48 by rvandepu         ###   ########.fr        #
+#    Updated: 2024/11/03 13:39:03 by aboyreau         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -39,6 +39,18 @@ LDLIBS += -lreadline
 .PHONY: all clean fclean re test
 
 all: $(NAME)
+
+fuzzer: CC = clang
+fuzzer: CFLAGS += -O1 -fsanitize=fuzzer,address
+fuzzer: OBJ := $(filter-out minishell.o,$(OBJ))
+fuzzer: LDLIBS += -fsanitize=fuzzer,address
+fuzzer: fclean $(OBJ)
+	rm -f $(NAME).o
+	$(CC) $(CFLAGS) -c $(CPPFLAGS) .fuzzer.c -o .fuzzer.o
+	$(MAKE) -C libft -j 16
+	$(CC) $(CFLAGS) $(LDFLAGS) $(OBJ) .fuzzer.o -o $(NAME) $(LDLIBS)
+	$(MAKE) clean
+
 
 clean:
 	$(MAKE) -s -C $(LIBFT_DIR) fclean
