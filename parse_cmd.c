@@ -6,7 +6,7 @@
 /*   By: rvandepu <rvandepu@student.42lehavre.fr>   +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/08 21:19:35 by rvandepu          #+#    #+#             */
-/*   Updated: 2024/10/21 17:49:54 by rvandepu         ###   ########.fr       */
+/*   Updated: 2024/11/11 15:56:10 by rvandepu         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,7 +21,13 @@ static bool	parse_redirect(t_parser *parser, t_redir *redir)
 	parser->parsing_redir = redir;
 	if (!sub_parser(parser, T_DEFAULT, &redir->filename)
 		|| redir->filename == NULL)
+	{
+		if (redir->is_heredoc)
+			parser->ctx->eno = E_HD_EXP_DELIM;
+		else
+			parser->ctx->eno = E_RD_EXP_FILENAME;
 		return (false);
+	}
 	parser->parsing_redir = NULL;
 	parser->has_skipped = true;
 	return (true);
@@ -48,7 +54,6 @@ static bool	parse_redirects(t_parser *parser)
 	return (false);
 }
 
-// NOTE: recursion here causes a stack overflow between 50k-100k redirects
 bool	parse_cmd(t_parser *parser, char **token)
 {
 	char	*cmdline;

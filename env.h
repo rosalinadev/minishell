@@ -6,7 +6,7 @@
 /*   By: rvandepu <rvandepu@student.42lehavre.fr>   +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/01 22:25:02 by rvandepu          #+#    #+#             */
-/*   Updated: 2024/11/02 06:03:22 by rvandepu         ###   ########.fr       */
+/*   Updated: 2024/11/12 14:10:09 by rvandepu         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,6 +15,7 @@
 
 # include <stdbool.h>
 # include <stdlib.h>
+# include "defaults.h"
 # include "libft.h"
 
 extern char	**environ;

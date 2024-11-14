@@ -6,7 +6,7 @@
 /*   By: rvandepu <rvandepu@student.42lehavre.fr>   +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/15 02:42:42 by rvandepu          #+#    #+#             */
-/*   Updated: 2024/11/02 06:25:20 by rvandepu         ###   ########.fr       */
+/*   Updated: 2024/11/11 16:23:50 by rvandepu         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,7 +18,7 @@
  * which the calling function will correctly interpret as an error.
  * I added an unnecessary cast to clarify for the reader.
  */
-bool	parse_var(t_parser *parser, char **token)
+static bool	_parse_var(t_parser *parser, char **token)
 {
 	char	*cmdline;
 	int		i;
@@ -44,4 +44,12 @@ bool	parse_var(t_parser *parser, char **token)
 	if (var == NULL)
 		return (parser->has_skipped = true, true);
 	return ((bool)(*token = ft_strdup(var)));
+}
+
+// wrapper for error attribution
+bool	parse_var(t_parser *parser, char **token)
+{
+	if (!_parse_var(parser, token))
+		return (parser->ctx->eno = E_MEM, false);
+	return (true);
 }

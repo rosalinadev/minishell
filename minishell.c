@@ -6,40 +6,40 @@
 /*   By: rvandepu <rvandepu@student.42lehavre.fr>   +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/05 19:14:24 by rvandepu          #+#    #+#             */
-/*   Updated: 2024/11/03 15:35:25 by rvandepu         ###   ########.fr       */
+/*   Updated: 2024/11/14 02:29:03 by rvandepu         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
 
-static void	print_cmds(t_cmd **cmds)
+static void	print_cmds(t_ctx *ctx)
 {
 	int		i;
 	int		j;
 
 	i = 0;
-	while (cmds[i])
+	while (i < ctx->cmd_count)
 	{
 		ft_printf("====================\n%10d\n====================\n", i);
-		ft_printf("argc: %d\nargv:\n", cmds[i]->argc);
-		if (cmds[i]->argc == 0)
+		ft_printf("argc: %d\nargv:\n", ctx->cmds[i].argc);
+		if (ctx->cmds[i].argc == 0)
 			ft_printf("(no arguments to print)\n");
 		j = 0;
-		while (j < cmds[i]->argc)
+		while (j < ctx->cmds[i].argc)
 		{
-			ft_printf("%3d: '%s'\n", j, cmds[i]->argv[j]);
+			ft_printf("%3d: '%s'\n", j, ctx->cmds[i].argv[j]);
 			j++;
 		}
 		ft_printf("in: %s\n\tis_heredoc:%d\n\tquoted:%d\n",
-			cmds[i]->redir[0].filename, cmds[i]->redir[0].is_heredoc,
-			cmds[i]->redir[0].quoted);
-		ft_printf("out: %s\n\tappend:%d\n", cmds[i]->redir[1].filename,
-			cmds[i]->redir[1].append);
+			ctx->cmds[i].redir[0].filename, ctx->cmds[i].redir[0].is_heredoc,
+			ctx->cmds[i].redir[0].quoted);
+		ft_printf("out: %s\n\tappend:%d\n", ctx->cmds[i].redir[1].filename,
+			ctx->cmds[i].redir[1].append);
 		i++;
 	}
 }
 
-static void	handle_cmds(t_ctx *ctx)
+/*static void	handle_cmds(t_ctx *ctx)
 {
 	t_cmd	*cmd;
 	t_env	*var;
@@ -94,55 +94,59 @@ static void	handle_cmds(t_ctx *ctx)
 		}
 		free(env);
 	}
-}
+}*/
 
-static void	free_cmds(t_cmd **cmds)
+void	free_cmds(t_ctx *ctx)
 {
-	int		i;
-
-	i = 0;
-	while (cmds[i])
-	{
-		free_cmd(cmds[i++], true);
-	}
-	free(cmds);
+	while (ctx->cmd_count--)
+		free_cmd(&ctx->cmds[ctx->cmd_count]);
+	free(ctx->cmds);
+	ctx->cmds = NULL;
 }
 
+// TODO exit
 static bool	loop(t_ctx *ctx)
 {
+	char	*prompt;
 	char	*cmdline;
-	bool	should_exit;
 
-	while (true)
+	prompt = env_get(ctx->env, "PS1");
+	if (!prompt)
+		prompt = "$ ";
+	cmdline = readline(prompt);
+	if (!cmdline)
+		return (ctx->should_exit = true);
+	add_history(cmdline);
+	if (!parse_cmdline(ctx, cmdline, 0))
 	{
-		cmdline = readline("[OhMyPKshell]$ ");
-		if (!cmdline)
-			return (true);
-		should_exit = !ft_strcmp(cmdline, "exit");
-		ft_printf("%s\n", cmdline);
-		add_history(cmdline);
-		if (!parse_cmdline(ctx, cmdline, 0))
-		{
-			ft_printf("error during parsing\n");
-			free(cmdline);
-			continue ;
-		}
+		err_p_clear("error during parsing", &ctx->eno);
 		free(cmdline);
-		print_cmds(ctx->cmds);
-		handle_cmds(ctx);
-		free_cmds(ctx->cmds);
-		if (should_exit)
-			return (true);
+		return (true);
 	}
+	free(cmdline);
+	print_cmds(ctx);
+	if (ctx->cmd_count)
+		exec_cmds(ctx);
+	free_cmds(ctx);
+	return (true);
 }
 
+// TODO
 int	main(void)
 {
 	t_ctx	ctx;
 
-	ctx = (t_ctx){.exitcode = 42};
-	env_init(&ctx.env, environ);
-	if (!loop(&ctx))
-		return (env_clear(&ctx.env), EXIT_FAILURE);
-	return (env_clear(&ctx.env), EXIT_SUCCESS);
+	ctx = (t_ctx){.exitcode = EXIT_SUCCESS};
+	if (!env_init(&ctx.env, environ))
+		return (err_p("main", E_MEM), EXIT_FAILURE);
+	while (!ctx.should_exit)
+	{
+		if (!loop(&ctx))
+		{
+			ctx.exitcode = EXIT_FAILURE;
+			break ;
+		}
+	}
+	env_clear(&ctx.env);
+	return (ctx.exitcode);
 }

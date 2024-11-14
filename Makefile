@@ -6,12 +6,13 @@
 #    By: rvandepu <rvandepu@student.42lehavre.fr>   +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/01/06 16:11:02 by rvandepu          #+#    #+#              #
-#    Updated: 2024/11/02 00:47:48 by rvandepu         ###   ########.fr        #
+#    Updated: 2024/11/13 17:02:54 by rvandepu         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
 NAME  := minishell
 FILES := $(NAME).c \
+		 error.c \
 		 env.c \
 		 env_utils.c \
 		 parser.c \
@@ -20,6 +21,15 @@ FILES := $(NAME).c \
 		 parse_default.c \
 		 parse_var.c \
 		 parse_doublequote.c \
+		 exec.c \
+		 builtin.c \
+		 bt_echo.c \
+		 bt_cd.c \
+		 bt_pwd.c \
+		 bt_export.c \
+		 bt_unset.c \
+		 bt_env.c \
+		 bt_exit.c \
 
 OBJ := $(FILES:%.c=%.o)
 

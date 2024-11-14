@@ -6,24 +6,20 @@
 /*   By: rvandepu <rvandepu@student.42lehavre.fr>   +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/13 06:49:12 by rvandepu          #+#    #+#             */
-/*   Updated: 2024/10/22 23:25:01 by rvandepu         ###   ########.fr       */
+/*   Updated: 2024/11/12 17:09:18 by rvandepu         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
 
-void	free_cmd(t_cmd *cmd, bool free_struct)
+void	free_cmd(t_cmd *cmd)
 {
-	int	i;
-
-	i = 0;
-	while (i < cmd->argc)
-		free(cmd->argv[i++]);
+	if (cmd->argv)
+		while (cmd->argc)
+			free(cmd->argv[--cmd->argc]);
 	free(cmd->argv);
 	free(cmd->redir[0].filename);
 	free(cmd->redir[1].filename);
-	if (free_struct)
-		free(cmd);
 }
 
 char	*dup_token(char *src, int len)
@@ -55,30 +51,17 @@ void	free_parser(t_parser *parser)
 	free(parser->tokens);
 }
 
-// TODO delete
-static void	print_args(t_parser *parser)
-{
-	int	i;
-
-	i = -1;
-	while (++i < parser->count)
-		ft_printf("'%s' ", parser->tokens[i]);
-	ft_printf("\n");
-}
-
 bool	sub_parser(t_parser *parent, t_token type, char **token)
 {
 	t_parser	parser;
 
-	ft_printf("[sub_parser] creating context with type %d\n", type);
 	get_parser(&parser, parent, type);
 	if (!parse_tokens(&parser, 0))
 		return (false);
-	ft_printf("[sub_parser] count %d: ", parser.count);
-	print_args(&parser);
 	if (parser.type != T_DOUBLEQUOTE && parser.count == 0)
 		return (free_parser(&parser), parent->has_skipped = true, true);
 	*token = ft_strjoin(parser.count, parser.tokens);
-	ft_printf("[sub_parser] result token: '%s'\n", *token);
+	if (*token == NULL)
+		parent->ctx->eno = E_MEM;
 	return (free_parser(&parser), *token != NULL);
 }

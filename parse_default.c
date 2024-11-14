@@ -6,14 +6,11 @@
 /*   By: rvandepu <rvandepu@student.42lehavre.fr>   +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/10 21:33:25 by rvandepu          #+#    #+#             */
-/*   Updated: 2024/10/19 16:03:07 by rvandepu         ###   ########.fr       */
+/*   Updated: 2024/11/14 04:05:15 by rvandepu         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
-
-// TODO
-#define DELIM " \t\'\"$<>|"
 
 static bool	parse_quote(t_parser *parser, char **token)
 {
@@ -27,18 +24,16 @@ static bool	parse_quote(t_parser *parser, char **token)
 	while (cmdline[i] && cmdline[i] != '\'')
 		i++;
 	if (!cmdline[i])
-		return (false);
+		return (parser->ctx->eno = E_QUOTES, false);
 	*token = dup_token(cmdline, i);
 	if (*token == NULL)
-		return (false);
-	ft_printf("[parse_quote] token: \"%s\" len:%d\n", *token, i);
+		return (parser->ctx->eno = E_MEM, false);
 	*parser->cmdline += i + 1;
 	return (true);
 }
 
 static bool	parse_special(t_parser *parser, char **token)
 {
-	ft_printf("[parse_special] found %c\n", **parser->cmdline);
 	if (**parser->cmdline == '\'')
 		return (parse_quote(parser, token));
 	else if (**parser->cmdline == '$')
@@ -49,9 +44,10 @@ static bool	parse_special(t_parser *parser, char **token)
 		return (true);
 	else if (**parser->cmdline == '|')
 		return (true);
-	ft_printf("[parse_special] non-handled special\n");
 	return (false);
 }
+
+#define DELIM "\'\"$<>|"
 
 bool	parse_default(t_parser *parser, char **token)
 {
@@ -60,15 +56,15 @@ bool	parse_default(t_parser *parser, char **token)
 
 	cmdline = *parser->cmdline;
 	i = 0;
-	if (ft_in(cmdline[i], DELIM) && !ft_in(cmdline[i], WHITESPACE))
+	if (ft_in(cmdline[i], DELIM))
 		return (parse_special(parser, token));
-	while (cmdline[i] && !ft_in(cmdline[i], DELIM))
+	while (cmdline[i] && !ft_in(cmdline[i], WHITESPACE DELIM))
 		i++;
 	if (!i)
 		return (true);
 	*token = dup_token(cmdline, i);
 	if (*token == NULL)
-		return (false);
+		return (parser->ctx->eno = E_MEM, false);
 	*parser->cmdline += i;
 	return (true);
 }

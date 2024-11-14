@@ -6,23 +6,45 @@
 /*   By: rvandepu <rvandepu@student.42lehavre.fr>   +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/07 19:59:38 by rvandepu          #+#    #+#             */
-/*   Updated: 2024/11/01 23:03:00 by rvandepu         ###   ########.fr       */
+/*   Updated: 2024/11/14 04:01:04 by rvandepu         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef MINISHELL_H
 # define MINISHELL_H
 
+# include <fcntl.h>
 # include <stdio.h>
+# include <stdint.h>
 # include <stdlib.h>
 # include <unistd.h>
 # include <stdbool.h>
-# include <readline/readline.h>
+# include <sys/wait.h>
+# include <sys/types.h>
 # include <readline/history.h>
-# include "libft.h"
+# include <readline/readline.h>
+# include "defaults.h"
 # include "env.h"
+# include "libft.h"
 
-# define WHITESPACE " \t"
+typedef enum e_err
+{
+	E__UNKNOWN = 0,
+	E_MEM,
+	E_OPEN,
+	E_EXP_CMD_PIPE,
+	E_PIPE_EXP_CMD,
+	E_HD_EXP_DELIM,
+	E_RD_EXP_FILENAME,
+	E_QUOTES,
+	E_ARGS_IDENTIFIER,
+	E_ARGS_TOO_FEW,
+	E_ARGS_TOO_MANY,
+	E_ARGS_NUMERIC,
+	E_EXECVE,
+	E_CMD_NOT_FOUND,
+	E__MAX
+}	t_err;
 
 typedef struct s_redir
 {
@@ -37,14 +59,20 @@ typedef struct s_cmd
 	t_redir	redir[2];
 	int		argc;
 	char	**argv;
+	pid_t	pid;
 }	t_cmd;
 
 typedef struct s_ctx
 {
+	t_err	eno;
 	t_env	*env;
-	t_cmd	**cmds;
-	int		exitcode;
+	int		cmd_count;
+	t_cmd	*cmds;
+	bool	should_exit;
+	uint8_t	exitcode;
 }	t_ctx;
+
+# define WHITESPACE " \t"
 
 typedef enum e_token
 {
@@ -67,12 +95,24 @@ typedef struct s_parser
 	char	**tokens;
 }	t_parser;
 
+// minishell.c
+// TODO move
+void	free_cmds(t_ctx *ctx);
+
+// error.c
+void	err_p(const char *s, t_err eno);
+void	err_p_clear(const char *s, t_err *eno);
+
+/*
+ * Parsing
+ */
+
 // parser.c
 bool	parse_tokens(t_parser *parser, int depth);
 int		parse_cmdline(t_ctx *ctx, char *cmdline, int depth);
 
 // parser_utils.c
-void	free_cmd(t_cmd *cmd, bool free_struct);
+void	free_cmd(t_cmd *cmd);
 char	*dup_token(char *src, int len);
 void	get_parser(t_parser *parser, t_parser *parent, t_token type);
 void	free_parser(t_parser *parser);
@@ -89,5 +129,40 @@ bool	parse_var(t_parser *parser, char **token);
 
 // parse_doublequote.c
 bool	parse_doublequote(t_parser *parser, char **token);
+
+/*
+ * Executing
+ */
+
+typedef enum e_bt
+{
+	BT__INVALID = 0,
+	BT__FIRST,
+	BT_ECHO = BT__FIRST,
+	BT_CD,
+	BT_PWD,
+	BT_EXPORT,
+	BT_UNSET,
+	BT_ENV,
+	BT_EXIT,
+	BT__MAX
+}	t_bt;
+
+typedef bool	(*t_bt_f)(t_ctx *ctx, t_cmd *cmd);
+
+// exec.c
+int		exec_cmds(t_ctx *ctx);
+
+// builtin.c
+t_bt_f	get_builtin(t_cmd *cmd);
+
+// bt_{echo,cd,pwd,export,unset,env,exit}.c
+bool	bt_echo(t_ctx *ctx, t_cmd *cmd);
+bool	bt_cd(t_ctx *ctx, t_cmd *cmd);
+bool	bt_pwd(t_ctx *ctx, t_cmd *cmd);
+bool	bt_export(t_ctx *ctx, t_cmd *cmd);
+bool	bt_unset(t_ctx *ctx, t_cmd *cmd);
+bool	bt_env(t_ctx *ctx, t_cmd *cmd);
+bool	bt_exit(t_ctx *ctx, t_cmd *cmd);
 
 #endif
