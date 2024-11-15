@@ -1,3 +1,5 @@
+--trace-children=yes
+--track-fds=yes
 --leak-check=full
 --show-leak-kinds=all
 --suppressions=misc/readline-leaks.supp

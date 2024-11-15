@@ -6,7 +6,7 @@
 /*   By: rvandepu <rvandepu@student.42lehavre.fr>   +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/07 08:30:57 by rvandepu          #+#    #+#             */
-/*   Updated: 2024/11/14 03:18:39 by rvandepu         ###   ########.fr       */
+/*   Updated: 2024/11/14 20:47:34 by rvandepu         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -46,9 +46,11 @@ t_bt_f	get_builtin(t_cmd *cmd)
 {
 	t_bt	bt;
 
+	if (!cmd->argc)
+		return (NULL);
 	bt = BT__FIRST;
 	while (bt < BT__MAX)
-		if (cmd->argc && ft_strcmp(cmd->argv[0], _bt_str()[bt++]) == 0)
+		if (ft_strcmp(cmd->argv[0], _bt_str()[bt++]) == 0)
 			return (_bt()[--bt]);
 	return (NULL);
 }

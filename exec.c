@@ -6,7 +6,7 @@
 /*   By: ekoubbi <ekoubbi@student.42lehavre.fr>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/05 14:37:54 by ekoubbi           #+#    #+#             */
-/*   Updated: 2024/11/14 03:56:34 by rvandepu         ###   ########.fr       */
+/*   Updated: 2024/11/15 16:15:53 by rvandepu         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -124,7 +124,9 @@ static bool	execute(t_cmd *cmd, t_ctx *ctx)
 
 	if (get_builtin(cmd))
 		return (run_bt(ctx, cmd), true);
+	//ft_printf("[execute] valid_path...\n");
 	valid_path = get_valid_path(cmd->argv[0], ctx->env);
+	//ft_printf("[execute] valid_path: %s\n", valid_path);
 	if (valid_path == NULL)
 		return (ctx->eno = E_CMD_NOT_FOUND, ctx->exitcode = 127, false);
 	env = env_environ(ctx->env);
@@ -154,7 +156,7 @@ static bool	last_cmd(int fdin, t_cmd *cmd, t_ctx *ctx)
 		ft_close(fdin);
 		if (!handle_redirection(ctx, cmd))
 			err_p_clear(DEFAULT_NAME, &ctx->eno);
-		if (!execute(cmd, ctx))
+		if (cmd->argc && !execute(cmd, ctx))
 			err_p("last error", ctx->eno);
 		env_clear(&ctx->env);
 		free_cmds(ctx);
@@ -184,7 +186,7 @@ static int	child_process(int fdin, t_cmd *cmd, t_ctx *ctx)
 			err_p_clear(DEFAULT_NAME, &ctx->eno);
 		closepipe(pipefd);
 		ft_close(fdin);
-		if (!execute(cmd, ctx))
+		if (cmd->argc && !execute(cmd, ctx))
 			err_p("child error", ctx->eno);
 		env_clear(&ctx->env);
 		free_cmds(ctx);
