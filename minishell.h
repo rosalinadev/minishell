@@ -6,7 +6,7 @@
 /*   By: rvandepu <rvandepu@student.42lehavre.fr>   +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/07 19:59:38 by rvandepu          #+#    #+#             */
-/*   Updated: 2024/11/14 04:01:04 by rvandepu         ###   ########.fr       */
+/*   Updated: 2024/11/19 08:40:16 by rvandepu         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,8 +27,11 @@
 # include "env.h"
 # include "libft.h"
 
+# define EXIT_PARSER_FAILURE 2
+
 typedef enum e_err
 {
+	E__NOPRINT = -1,
 	E__UNKNOWN = 0,
 	E_MEM,
 	E_OPEN,
@@ -43,6 +46,7 @@ typedef enum e_err
 	E_ARGS_NUMERIC,
 	E_EXECVE,
 	E_CMD_NOT_FOUND,
+	E_HOMEUNSET,
 	E__MAX
 }	t_err;
 

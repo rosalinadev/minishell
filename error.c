@@ -6,7 +6,7 @@
 /*   By: rvandepu <rvandepu@student.42lehavre.fr>   +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/11 13:46:30 by rvandepu          #+#    #+#             */
-/*   Updated: 2024/11/14 02:16:15 by rvandepu         ###   ########.fr       */
+/*   Updated: 2024/11/19 08:40:07 by rvandepu         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,6 +29,7 @@ static const char	*err_str(t_err eno)
 		[E_ARGS_NUMERIC] = "Argument must be numeric", \
 		[E_EXECVE] = "execve failed", \
 		[E_CMD_NOT_FOUND] = "Command not found", \
+		[E_HOMEUNSET] = "HOME not set", \
 	};
 
 	if (E__UNKNOWN < eno && eno < E__MAX && errstr[eno])
@@ -40,6 +41,8 @@ void	err_p(const char *s, t_err eno)
 {
 	const char	*errstr;
 
+	if (eno == E__NOPRINT)
+		return ;
 	errstr = err_str(eno);
 	if (s && *s)
 		ft_fprintf(stderr, "%s: %s\n", s, errstr);

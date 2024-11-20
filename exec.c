@@ -6,7 +6,7 @@
 /*   By: ekoubbi <ekoubbi@student.42lehavre.fr>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/05 14:37:54 by ekoubbi           #+#    #+#             */
-/*   Updated: 2024/11/15 16:15:53 by rvandepu         ###   ########.fr       */
+/*   Updated: 2024/11/20 05:38:55 by rvandepu         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,10 +31,8 @@ static void	closepipe(int *pipefd)
 static void	ft_free(char **tab)
 {
 	int	i;
-	int	j;
 
 	i = 0;
-	j = 0;
 	while (tab[i])
 	{
 		free(tab[i]);
@@ -43,6 +41,8 @@ static void	ft_free(char **tab)
 	free(tab);
 }
 
+// TODO less mallocs?
+// TODO test invalid PATH
 static char	*get_valid_path(char *cmd, t_env *env)
 {
 	char	*path_line;
@@ -106,17 +106,15 @@ static void	run_bt(t_ctx *ctx, t_cmd *cmd)
 	t_bt_f	bt;
 
 	bt = get_builtin(cmd);
-	if (bt)
+	ctx->exitcode = EXIT_SUCCESS;
+	if (!bt(ctx, cmd))
 	{
-		ctx->exitcode = EXIT_SUCCESS;
-		if (!bt(ctx, cmd))
-		{
-			err_p_clear(cmd->argv[0], &ctx->eno);
-			ctx->exitcode = EXIT_FAILURE;
-		}
+		err_p_clear(cmd->argv[0], &ctx->eno);
+		ctx->exitcode = EXIT_FAILURE;
 	}
 }
 
+// TODO handle redirect errors
 static bool	execute(t_cmd *cmd, t_ctx *ctx)
 {
 	char	*valid_path;
@@ -124,9 +122,7 @@ static bool	execute(t_cmd *cmd, t_ctx *ctx)
 
 	if (get_builtin(cmd))
 		return (run_bt(ctx, cmd), true);
-	//ft_printf("[execute] valid_path...\n");
 	valid_path = get_valid_path(cmd->argv[0], ctx->env);
-	//ft_printf("[execute] valid_path: %s\n", valid_path);
 	if (valid_path == NULL)
 		return (ctx->eno = E_CMD_NOT_FOUND, ctx->exitcode = 127, false);
 	env = env_environ(ctx->env);
@@ -137,15 +133,20 @@ static bool	execute(t_cmd *cmd, t_ctx *ctx)
 	free_cmds(ctx);
 	execve(valid_path, argv, env);
 	ctx->eno = E_EXECVE;
+	ft_free(argv);
 	free(valid_path);
 	free(env);
 	ctx->exitcode = EXIT_FAILURE;
 	return (false);
 }
 
+// TODO handle redirect with builtins...
+// which means probably move a bunch of logic up and a bunch down,
+// like being able to call execute without a fork and moving fork-specific
+// logic elsewhere...........
 static bool	last_cmd(int fdin, t_cmd *cmd, t_ctx *ctx)
 {
-	if (get_builtin(cmd))
+	if (ctx->cmd_count == 1 && get_builtin(cmd))
 		return (run_bt(ctx, cmd), true);
 	cmd->pid = fork();
 	if (cmd->pid < 0)
@@ -166,7 +167,7 @@ static bool	last_cmd(int fdin, t_cmd *cmd, t_ctx *ctx)
 	return (true);
 }
 
-static int	child_process(int fdin, t_cmd *cmd, t_ctx *ctx)
+static bool	child_process(int *fdin, t_cmd *cmd, t_ctx *ctx)
 {
 	int		pipefd[2];
 
@@ -180,38 +181,50 @@ static int	child_process(int fdin, t_cmd *cmd, t_ctx *ctx)
 		return (closepipe(pipefd), perror("failed to fork"), false);
 	if (cmd->pid == 0)
 	{
-		dup2(fdin, STDIN_FILENO);
+		dup2(*fdin, STDIN_FILENO);
 		dup2(pipefd[WRITE], STDOUT_FILENO);
 		if (!handle_redirection(ctx, cmd))
 			err_p_clear(DEFAULT_NAME, &ctx->eno);
 		closepipe(pipefd);
-		ft_close(fdin);
+		ft_close(*fdin);
 		if (cmd->argc && !execute(cmd, ctx))
 			err_p("child error", ctx->eno);
 		env_clear(&ctx->env);
 		free_cmds(ctx);
 		exit(ctx->exitcode);
 	}
-	ft_close(fdin);
+	ft_close(*fdin);
 	ft_close(pipefd[WRITE]);
-	return (pipefd[READ]);
+	return (*fdin = pipefd[READ], true);
 }
 
+// TODO error handling!!!!!!
+// TODO exitcode
 int	exec_cmds(t_ctx *ctx)
 {
 	int		i;
 	int		fdin;
+	int		status;
 
 	fdin = STDIN_FILENO;
 	i = 0;
 	while (i < ctx->cmd_count - 1)
-		fdin = child_process(fdin, &ctx->cmds[i++], ctx);
+		child_process(&fdin, &ctx->cmds[i++], ctx);
 	last_cmd(fdin, &ctx->cmds[i], ctx);
 	i = 0;
+	status = 0;
 	while (i < ctx->cmd_count)
 	{
-		wait(NULL);
+		if (ctx->cmds[i].pid)
+			waitpid(ctx->cmds[i].pid, &status, 0);
 		i++;
 	}
+	if (ctx->cmd_count > 2 && WIFEXITED(status))
+		ctx->exitcode = WEXITSTATUS(status);
 	return (0);
 }
+
+/*bool	exec(t_ctx *ctx)
+{
+	if ()
+}*/

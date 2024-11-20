@@ -6,7 +6,7 @@
 /*   By: rvandepu <rvandepu@student.42lehavre.fr>   +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/05 19:14:24 by rvandepu          #+#    #+#             */
-/*   Updated: 2024/11/14 02:29:03 by rvandepu         ###   ########.fr       */
+/*   Updated: 2024/11/19 05:27:09 by rvandepu         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -104,6 +104,8 @@ void	free_cmds(t_ctx *ctx)
 	ctx->cmds = NULL;
 }
 
+// TODO signals
+// TODO heredocs
 // TODO exit
 static bool	loop(t_ctx *ctx)
 {
@@ -124,7 +126,7 @@ static bool	loop(t_ctx *ctx)
 		return (true);
 	}
 	free(cmdline);
-	print_cmds(ctx);
+	//print_cmds(ctx);
 	if (ctx->cmd_count)
 		exec_cmds(ctx);
 	free_cmds(ctx);
@@ -136,6 +138,7 @@ int	main(void)
 {
 	t_ctx	ctx;
 
+	rl_outstream = stderr;
 	ctx = (t_ctx){.exitcode = EXIT_SUCCESS};
 	if (!env_init(&ctx.env, environ))
 		return (err_p("main", E_MEM), EXIT_FAILURE);
