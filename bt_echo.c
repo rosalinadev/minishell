@@ -6,7 +6,7 @@
 /*   By: rvandepu <rvandepu@student.42lehavre.fr>   +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/13 16:32:56 by rvandepu          #+#    #+#             */
-/*   Updated: 2024/11/14 02:41:45 by rvandepu         ###   ########.fr       */
+/*   Updated: 2024/11/27 03:36:30 by rvandepu         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,6 +30,7 @@ static bool	has_opt_n(char *str)
 	return (false);
 }
 
+// TODO echo -n -n -n jtm chayanne
 bool	bt_echo(t_ctx *ctx, t_cmd *cmd)
 {
 	int		i;

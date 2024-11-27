@@ -6,7 +6,7 @@
 /*   By: rvandepu <rvandepu@student.42lehavre.fr>   +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/13 06:49:12 by rvandepu          #+#    #+#             */
-/*   Updated: 2024/11/12 17:09:18 by rvandepu         ###   ########.fr       */
+/*   Updated: 2024/11/25 04:36:00 by rvandepu         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -62,6 +62,6 @@ bool	sub_parser(t_parser *parent, t_token type, char **token)
 		return (free_parser(&parser), parent->has_skipped = true, true);
 	*token = ft_strjoin(parser.count, parser.tokens);
 	if (*token == NULL)
-		parent->ctx->eno = E_MEM;
+		eno(parent->ctx, E_MEM);
 	return (free_parser(&parser), *token != NULL);
 }

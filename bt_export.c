@@ -6,7 +6,7 @@
 /*   By: rvandepu <rvandepu@student.42lehavre.fr>   +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/13 16:33:26 by rvandepu          #+#    #+#             */
-/*   Updated: 2024/11/14 02:07:42 by rvandepu         ###   ########.fr       */
+/*   Updated: 2024/11/25 04:22:52 by rvandepu         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,12 +21,12 @@ static bool	handle_argument(t_ctx *ctx, char **arg)
 		str = env_get(ctx->env, *arg);
 		str = ft_strjoinv(3 - (str == NULL), *arg, "=", str);
 		if (str == NULL)
-			return (ctx->eno = E_MEM, false);
+			return (eno(ctx, E_MEM), false);
 		free(*arg);
 		*arg = str;
 	}
 	if (!env_set(&ctx->env, *arg))
-		return (ctx->eno = E_MEM, false);
+		return (eno(ctx, E_MEM), false);
 	return (true);
 }
 

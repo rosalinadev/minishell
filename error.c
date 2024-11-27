@@ -6,7 +6,7 @@
 /*   By: rvandepu <rvandepu@student.42lehavre.fr>   +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/11 13:46:30 by rvandepu          #+#    #+#             */
-/*   Updated: 2024/11/19 08:40:07 by rvandepu         ###   ########.fr       */
+/*   Updated: 2024/11/26 00:07:55 by rvandepu         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -54,4 +54,11 @@ void	err_p_clear(const char *s, t_err *eno)
 {
 	err_p(s, *eno);
 	*eno = E__UNKNOWN;
+}
+
+void	eno(t_ctx *ctx, t_err eno)
+{
+	ctx->eno = eno;
+	if (eno == E_MEM)
+		ctx->should_exit = true;
 }

@@ -6,7 +6,7 @@
 /*   By: rvandepu <rvandepu@student.42lehavre.fr>   +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/15 02:42:42 by rvandepu          #+#    #+#             */
-/*   Updated: 2024/11/11 16:23:50 by rvandepu         ###   ########.fr       */
+/*   Updated: 2024/11/25 04:35:36 by rvandepu         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -50,6 +50,6 @@ static bool	_parse_var(t_parser *parser, char **token)
 bool	parse_var(t_parser *parser, char **token)
 {
 	if (!_parse_var(parser, token))
-		return (parser->ctx->eno = E_MEM, false);
+		return (eno(parser->ctx, E_MEM), false);
 	return (true);
 }

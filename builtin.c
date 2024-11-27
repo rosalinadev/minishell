@@ -6,7 +6,7 @@
 /*   By: rvandepu <rvandepu@student.42lehavre.fr>   +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/07 08:30:57 by rvandepu          #+#    #+#             */
-/*   Updated: 2024/11/14 20:47:34 by rvandepu         ###   ########.fr       */
+/*   Updated: 2024/11/27 04:14:27 by rvandepu         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,6 +15,7 @@
 static const t_bt_f	*_bt(void)
 {
 	static const t_bt_f		bt[BT__MAX] = {\
+		[BT_DBG_CMDS] = bt_dbg_cmds, \
 		[BT_ECHO] = bt_echo, \
 		[BT_CD] = bt_cd, \
 		[BT_PWD] = bt_pwd, \
@@ -30,6 +31,7 @@ static const t_bt_f	*_bt(void)
 static const char *const	*_bt_str(void)
 {
 	static const char *const	bt_str[BT__MAX] = {\
+		[BT_DBG_CMDS] = "_debug:cmds", \
 		[BT_ECHO] = "echo", \
 		[BT_CD] = "cd", \
 		[BT_PWD] = "pwd", \

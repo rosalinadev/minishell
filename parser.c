@@ -6,7 +6,7 @@
 /*   By: rvandepu <rvandepu@student.42lehavre.fr>   +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/08 21:14:57 by rvandepu          #+#    #+#             */
-/*   Updated: 2024/11/19 02:44:33 by rvandepu         ###   ########.fr       */
+/*   Updated: 2024/11/25 04:37:30 by rvandepu         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,7 +44,7 @@ bool	parse_tokens(t_parser *parser, int depth)
 	{
 		parser->tokens = ft_calloc(depth + 1, sizeof(char *));
 		if (parser->tokens == NULL)
-			return (parser->ctx->eno = E_MEM, false);
+			return (eno(parser->ctx, E_MEM), false);
 		return (parser->count = depth, true);
 	}
 	if (!parse_tokens(parser, depth + 1))
@@ -77,15 +77,15 @@ int	parse_cmdline(t_ctx *ctx, char *cmdline, int depth)
 		cmdline++;
 	if (*cmdline == '|')
 		return (ctx->exitcode = EXIT_PARSER_FAILURE,
-			ctx->eno = E_EXP_CMD_PIPE, false);
+			eno(ctx, E_EXP_CMD_PIPE), false);
 	if (!*cmdline)
 	{
 		if (was_pipe)
 			return (ctx->exitcode = EXIT_PARSER_FAILURE,
-				ctx->eno = E_PIPE_EXP_CMD, false);
+				eno(ctx, E_PIPE_EXP_CMD), false);
 		ctx->cmds = ft_calloc(depth, sizeof(t_cmd));
 		if (ctx->cmds == NULL)
-			return (ctx->eno = E_MEM, false);
+			return (eno(ctx, E_MEM), false);
 		return (ctx->cmd_count = depth, true);
 	}
 	if (!parse_command(ctx, &cmd, &cmdline))

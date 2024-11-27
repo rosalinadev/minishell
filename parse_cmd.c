@@ -6,7 +6,7 @@
 /*   By: rvandepu <rvandepu@student.42lehavre.fr>   +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/08 21:19:35 by rvandepu          #+#    #+#             */
-/*   Updated: 2024/11/19 02:38:47 by rvandepu         ###   ########.fr       */
+/*   Updated: 2024/11/25 04:33:38 by rvandepu         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,9 +23,9 @@ static bool	parse_redirect(t_parser *parser, t_redir *redir)
 		|| redir->filename == NULL)
 	{
 		if (redir->is_heredoc)
-			parser->ctx->eno = E_HD_EXP_DELIM;
+			eno(parser->ctx, E_HD_EXP_DELIM);
 		else
-			parser->ctx->eno = E_RD_EXP_FILENAME;
+			eno(parser->ctx, E_RD_EXP_FILENAME);
 		return (parser->ctx->exitcode = EXIT_PARSER_FAILURE, false);
 	}
 	parser->parsing_redir = NULL;

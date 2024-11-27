@@ -6,7 +6,7 @@
 /*   By: rvandepu <rvandepu@student.42lehavre.fr>   +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/15 09:07:53 by rvandepu          #+#    #+#             */
-/*   Updated: 2024/11/19 02:43:35 by rvandepu         ###   ########.fr       */
+/*   Updated: 2024/11/25 04:36:32 by rvandepu         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,9 +31,9 @@ bool	parse_doublequote(t_parser *parser, char **token)
 		i++;
 	if (!cmdline[i])
 		return (parser->ctx->exitcode = EXIT_PARSER_FAILURE,
-			parser->ctx->eno = E_QUOTES, false);
+			eno(parser->ctx, E_QUOTES), false);
 	*token = dup_token(cmdline, i);
 	if (*token == NULL)
-		return (parser->ctx->eno = E_MEM, false);
+		return (eno(parser->ctx, E_MEM), false);
 	return (*parser->cmdline += i, true);
 }

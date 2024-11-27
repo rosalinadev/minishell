@@ -6,7 +6,7 @@
 /*   By: rvandepu <rvandepu@student.42lehavre.fr>   +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/07 19:59:38 by rvandepu          #+#    #+#             */
-/*   Updated: 2024/11/19 08:40:16 by rvandepu         ###   ########.fr       */
+/*   Updated: 2024/11/27 04:21:00 by rvandepu         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -74,6 +74,7 @@ typedef struct s_ctx
 	t_cmd	*cmds;
 	bool	should_exit;
 	uint8_t	exitcode;
+	void	(*debug_hook)(struct s_ctx *);
 }	t_ctx;
 
 # define WHITESPACE " \t"
@@ -106,6 +107,7 @@ void	free_cmds(t_ctx *ctx);
 // error.c
 void	err_p(const char *s, t_err eno);
 void	err_p_clear(const char *s, t_err *eno);
+void	eno(t_ctx *ctx, t_err eno);
 
 /*
  * Parsing
@@ -142,7 +144,8 @@ typedef enum e_bt
 {
 	BT__INVALID = 0,
 	BT__FIRST,
-	BT_ECHO = BT__FIRST,
+	BT_DBG_CMDS = BT__FIRST,
+	BT_ECHO,
 	BT_CD,
 	BT_PWD,
 	BT_EXPORT,
@@ -155,12 +158,13 @@ typedef enum e_bt
 typedef bool	(*t_bt_f)(t_ctx *ctx, t_cmd *cmd);
 
 // exec.c
-int		exec_cmds(t_ctx *ctx);
+bool	exec_cmds(t_ctx *ctx);
 
 // builtin.c
 t_bt_f	get_builtin(t_cmd *cmd);
 
-// bt_{echo,cd,pwd,export,unset,env,exit}.c
+// bt_{debug_cmds,echo,cd,pwd,export,unset,env,exit}.c
+bool	bt_dbg_cmds(t_ctx *ctx, t_cmd *cmd);
 bool	bt_echo(t_ctx *ctx, t_cmd *cmd);
 bool	bt_cd(t_ctx *ctx, t_cmd *cmd);
 bool	bt_pwd(t_ctx *ctx, t_cmd *cmd);

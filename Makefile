@@ -6,7 +6,7 @@
 #    By: rvandepu <rvandepu@student.42lehavre.fr>   +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/01/06 16:11:02 by rvandepu          #+#    #+#              #
-#    Updated: 2024/11/13 17:02:54 by rvandepu         ###   ########.fr        #
+#    Updated: 2024/11/26 20:28:23 by rvandepu         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -23,6 +23,7 @@ FILES := $(NAME).c \
 		 parse_doublequote.c \
 		 exec.c \
 		 builtin.c \
+		 bt_debug_cmds.c \
 		 bt_echo.c \
 		 bt_cd.c \
 		 bt_pwd.c \

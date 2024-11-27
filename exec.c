@@ -6,7 +6,7 @@
 /*   By: ekoubbi <ekoubbi@student.42lehavre.fr>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/05 14:37:54 by ekoubbi           #+#    #+#             */
-/*   Updated: 2024/11/20 05:38:55 by rvandepu         ###   ########.fr       */
+/*   Updated: 2024/11/27 03:48:17 by rvandepu         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,17 +15,31 @@
 #define WRITE 1
 #define READ 0
 
-static int	ft_close(int fd)
+static int	ft_close(int *fd)
 {
-	if (fd > 2)
-		return (close(fd));
-	return (0);
+	int	ret;
+
+	ret = 0;
+	if (*fd >= 0 && *fd != STDIN_FILENO
+		&& *fd != STDOUT_FILENO && *fd != STDERR_FILENO)
+	{
+		ret = close(*fd);
+		*fd = -1;
+	}
+	return (ret);
 }
 
-static void	closepipe(int *pipefd)
+static void	closetab(int count, int *fd_tab)
 {
-	ft_close(pipefd[READ]);
-	ft_close(pipefd[WRITE]);
+	int	i;
+
+	i = 0;
+	while (i < count)
+	{
+		ft_close(&fd_tab[i]);
+		fd_tab[i] = -1;
+		i++;
+	}
 }
 
 static void	ft_free(char **tab)
@@ -63,10 +77,7 @@ static char	*get_valid_path(char *cmd, t_env *env)
 	{
 		path = ft_strjoinv(3, array_env[i], "/", cmd);
 		if (access(path, X_OK) == 0)
-		{
-			ft_free(array_env);
-			return (path);
-		}
+			return (ft_free(array_env), path);
 		free(path);
 		i++;
 	}
@@ -74,31 +85,33 @@ static char	*get_valid_path(char *cmd, t_env *env)
 	return (NULL);
 }
 
+// TODO check error handling
 static bool	handle_redirection(t_ctx *ctx, t_cmd *cmd)
 {
-	int	fd1;
-	int	fd2;
+	int		fd;
+	bool	ret;
 
+	ret = true;
 	if (cmd->redir[0].filename != NULL)
 	{
-		fd1 = open(cmd->redir[0].filename, O_RDONLY);
-		if (fd1 < 0)
-			return (ctx->eno = E_OPEN, false);
-		dup2(fd1, STDIN_FILENO);
+		fd = open(cmd->redir[0].filename, O_RDONLY);
+		if (fd < 0)
+			ret = (eno(ctx, E_OPEN), false);
+		(dup2(fd, STDIN_FILENO), close(fd));
 	}
 	if (cmd->redir[1].filename != NULL)
 	{
 		if (cmd->redir[1].append)
-			fd2 = open(cmd->redir[1].filename,
+			fd = open(cmd->redir[1].filename,
 					O_WRONLY | O_CREAT | O_APPEND, S_IRWXU);
 		else
-			fd2 = open(cmd->redir[1].filename,
+			fd = open(cmd->redir[1].filename,
 					O_WRONLY | O_CREAT | O_TRUNC, S_IRWXU);
-		if (fd2 < 0)
-			return (ctx->eno = E_OPEN, false);
-		dup2(fd2, STDOUT_FILENO);
+		if (fd < 0)
+			ret = (eno(ctx, E_OPEN), false);
+		(dup2(fd, STDOUT_FILENO), close(fd));
 	}
-	return (true);
+	return (ret);
 }
 
 static void	run_bt(t_ctx *ctx, t_cmd *cmd)
@@ -115,116 +128,93 @@ static void	run_bt(t_ctx *ctx, t_cmd *cmd)
 }
 
 // TODO handle redirect errors
-static bool	execute(t_cmd *cmd, t_ctx *ctx)
+static bool	execute(t_ctx *ctx, t_cmd *cmd)
 {
 	char	*valid_path;
 	char	**env;
 
+	if (!handle_redirection(ctx, cmd))
+		err_p_clear(DEFAULT_NAME, &ctx->eno);
 	if (get_builtin(cmd))
 		return (run_bt(ctx, cmd), true);
 	valid_path = get_valid_path(cmd->argv[0], ctx->env);
 	if (valid_path == NULL)
-		return (ctx->eno = E_CMD_NOT_FOUND, ctx->exitcode = 127, false);
+		return (eno(ctx, E_CMD_NOT_FOUND), ctx->exitcode = 127, false);
 	env = env_environ(ctx->env);
 	if (!env)
-		return (free(valid_path), ctx->eno = E_MEM, false);
-	char **(argv) = cmd->argv;
-	cmd->argv = NULL;
-	free_cmds(ctx);
-	execve(valid_path, argv, env);
-	ctx->eno = E_EXECVE;
-	ft_free(argv);
-	free(valid_path);
-	free(env);
+		return (free(valid_path), eno(ctx, E_MEM), false);
+	execve(valid_path, cmd->argv, env);
+	perror("execute: execve failed");
+	eno(ctx, E__NOPRINT);
 	ctx->exitcode = EXIT_FAILURE;
-	return (false);
+	return (free(valid_path), free(env), false);
 }
 
 // TODO handle redirect with builtins...
 // which means probably move a bunch of logic up and a bunch down,
 // like being able to call execute without a fork and moving fork-specific
 // logic elsewhere...........
-static bool	last_cmd(int fdin, t_cmd *cmd, t_ctx *ctx)
-{
-	if (ctx->cmd_count == 1 && get_builtin(cmd))
-		return (run_bt(ctx, cmd), true);
-	cmd->pid = fork();
-	if (cmd->pid < 0)
-		return (perror("failed to fork"), false);
-	if (cmd->pid == 0)
-	{
-		dup2(fdin, STDIN_FILENO);
-		ft_close(fdin);
-		if (!handle_redirection(ctx, cmd))
-			err_p_clear(DEFAULT_NAME, &ctx->eno);
-		if (cmd->argc && !execute(cmd, ctx))
-			err_p("last error", ctx->eno);
-		env_clear(&ctx->env);
-		free_cmds(ctx);
-		exit(ctx->exitcode);
-	}
-	ft_close(fdin);
-	return (true);
-}
-
-static bool	child_process(int *fdin, t_cmd *cmd, t_ctx *ctx)
+static bool	exec_fork(int *fdin, t_cmd *cmd, t_ctx *ctx, bool should_pipe)
 {
 	int		pipefd[2];
 
-	if (pipe(pipefd) == -1)
-	{
-		perror("pipe");
-		exit(EXIT_FAILURE);
-	}
+	if (should_pipe && pipe(pipefd) == -1)
+		return (perror("exec_fork: couldn't pipe"), false);
 	cmd->pid = fork();
 	if (cmd->pid < 0)
-		return (closepipe(pipefd), perror("failed to fork"), false);
+		return (closetab(2, pipefd), perror("exec_fork: couldn't fork"), false);
 	if (cmd->pid == 0)
 	{
 		dup2(*fdin, STDIN_FILENO);
-		dup2(pipefd[WRITE], STDOUT_FILENO);
-		if (!handle_redirection(ctx, cmd))
-			err_p_clear(DEFAULT_NAME, &ctx->eno);
-		closepipe(pipefd);
-		ft_close(*fdin);
-		if (cmd->argc && !execute(cmd, ctx))
-			err_p("child error", ctx->eno);
-		env_clear(&ctx->env);
-		free_cmds(ctx);
-		exit(ctx->exitcode);
+		ft_close(fdin);
+		if (should_pipe)
+		{
+			dup2(pipefd[WRITE], STDOUT_FILENO);
+			closetab(2, pipefd);
+		}
+		if (cmd->argc && !execute(ctx, cmd))
+			err_p_clear("exec_fork: child error", &ctx->eno);
+		return (ctx->should_exit = true, eno(ctx, E__NOPRINT), false);
 	}
-	ft_close(*fdin);
-	ft_close(pipefd[WRITE]);
+	ft_close(fdin);
+	if (should_pipe)
+		ft_close(&pipefd[WRITE]);
 	return (*fdin = pipefd[READ], true);
+}
+
+static bool	exec_builtin_nofork(t_ctx *ctx, t_cmd *cmd)
+{
+	int	fd[2];
+
+	fd[0] = dup(STDIN_FILENO);
+	fd[1] = dup(STDOUT_FILENO);
+	if (fd[0] < 0 || fd[1] < 0)
+		return (closetab(2, fd), false);
+	execute(ctx, cmd);
+	dup2(fd[0], STDIN_FILENO);
+	dup2(fd[1], STDOUT_FILENO);
+	closetab(2, fd);
+	return (true);
 }
 
 // TODO error handling!!!!!!
 // TODO exitcode
-int	exec_cmds(t_ctx *ctx)
+bool	exec_cmds(t_ctx *ctx)
 {
 	int		i;
 	int		fdin;
 	int		status;
 
+	if (ctx->cmd_count == 1 && get_builtin(&ctx->cmds[0]))
+		return (exec_builtin_nofork(ctx, &ctx->cmds[0]));
 	fdin = STDIN_FILENO;
+	i = -1;
+	while (++i < ctx->cmd_count)
+		if (!exec_fork(&fdin, &ctx->cmds[i], ctx, i < ctx->cmd_count - 1))
+			return (ft_close(&fdin), false);
 	i = 0;
-	while (i < ctx->cmd_count - 1)
-		child_process(&fdin, &ctx->cmds[i++], ctx);
-	last_cmd(fdin, &ctx->cmds[i], ctx);
-	i = 0;
-	status = 0;
 	while (i < ctx->cmd_count)
-	{
-		if (ctx->cmds[i].pid)
-			waitpid(ctx->cmds[i].pid, &status, 0);
-		i++;
-	}
-	if (ctx->cmd_count > 2 && WIFEXITED(status))
-		ctx->exitcode = WEXITSTATUS(status);
-	return (0);
+		waitpid(ctx->cmds[i++].pid, &status, 0);
+	ctx->exitcode = WEXITSTATUS(status);
+	return (true);
 }
-
-/*bool	exec(t_ctx *ctx)
-{
-	if ()
-}*/
