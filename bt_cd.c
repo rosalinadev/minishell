@@ -6,7 +6,7 @@
 /*   By: rvandepu <rvandepu@student.42lehavre.fr>   +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/13 16:33:14 by rvandepu          #+#    #+#             */
-/*   Updated: 2024/11/25 04:22:07 by rvandepu         ###   ########.fr       */
+/*   Updated: 2024/12/01 07:49:50 by rvandepu         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,6 +28,6 @@ bool	bt_cd(t_ctx *ctx, t_cmd *cmd)
 	if (dir == NULL)
 		return (eno(ctx, E_HOMEUNSET), false);
 	if (chdir(dir) < 0)
-		return (perror("cd"), eno(ctx, E__NOPRINT), false);
+		return (eno(ctx, E_CHDIR), false);
 	return (true);
 }

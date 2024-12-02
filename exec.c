@@ -6,7 +6,7 @@
 /*   By: ekoubbi <ekoubbi@student.42lehavre.fr>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/05 14:37:54 by ekoubbi           #+#    #+#             */
-/*   Updated: 2024/11/27 03:48:17 by rvandepu         ###   ########.fr       */
+/*   Updated: 2024/12/02 07:34:33 by rvandepu         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -57,6 +57,7 @@ static void	ft_free(char **tab)
 
 // TODO less mallocs?
 // TODO test invalid PATH
+// FIXME . is in always in path
 static char	*get_valid_path(char *cmd, t_env *env)
 {
 	char	*path_line;
@@ -122,7 +123,7 @@ static void	run_bt(t_ctx *ctx, t_cmd *cmd)
 	ctx->exitcode = EXIT_SUCCESS;
 	if (!bt(ctx, cmd))
 	{
-		err_p_clear(cmd->argv[0], &ctx->eno);
+		err_p_clear(cmd->argv[0], &ctx->err);
 		ctx->exitcode = EXIT_FAILURE;
 	}
 }
@@ -134,7 +135,7 @@ static bool	execute(t_ctx *ctx, t_cmd *cmd)
 	char	**env;
 
 	if (!handle_redirection(ctx, cmd))
-		err_p_clear(DEFAULT_NAME, &ctx->eno);
+		return (false);
 	if (get_builtin(cmd))
 		return (run_bt(ctx, cmd), true);
 	valid_path = get_valid_path(cmd->argv[0], ctx->env);
@@ -142,27 +143,24 @@ static bool	execute(t_ctx *ctx, t_cmd *cmd)
 		return (eno(ctx, E_CMD_NOT_FOUND), ctx->exitcode = 127, false);
 	env = env_environ(ctx->env);
 	if (!env)
-		return (free(valid_path), eno(ctx, E_MEM), false);
+		return (eno(ctx, E_MEM), free(valid_path), false);
 	execve(valid_path, cmd->argv, env);
-	perror("execute: execve failed");
-	eno(ctx, E__NOPRINT);
+	eno(ctx, E_EXECVE);
 	ctx->exitcode = EXIT_FAILURE;
 	return (free(valid_path), free(env), false);
 }
 
-// TODO handle redirect with builtins...
-// which means probably move a bunch of logic up and a bunch down,
-// like being able to call execute without a fork and moving fork-specific
-// logic elsewhere...........
+// TODO correctly handle errors
+// yes, you're reading this right, the child returns to the main to exit
 static bool	exec_fork(int *fdin, t_cmd *cmd, t_ctx *ctx, bool should_pipe)
 {
 	int		pipefd[2];
 
 	if (should_pipe && pipe(pipefd) == -1)
-		return (perror("exec_fork: couldn't pipe"), false);
+		return (eno(ctx, E_PIPE), false);
 	cmd->pid = fork();
 	if (cmd->pid < 0)
-		return (closetab(2, pipefd), perror("exec_fork: couldn't fork"), false);
+		return (eno(ctx, E_FORK), closetab(2, pipefd), false);
 	if (cmd->pid == 0)
 	{
 		dup2(*fdin, STDIN_FILENO);
@@ -172,9 +170,9 @@ static bool	exec_fork(int *fdin, t_cmd *cmd, t_ctx *ctx, bool should_pipe)
 			dup2(pipefd[WRITE], STDOUT_FILENO);
 			closetab(2, pipefd);
 		}
-		if (cmd->argc && !execute(ctx, cmd))
-			err_p_clear("exec_fork: child error", &ctx->eno);
-		return (ctx->should_exit = true, eno(ctx, E__NOPRINT), false);
+		if (cmd->argc && execute(ctx, cmd))
+			eno(ctx, E__NOPRINT);
+		return (ctx->should_exit = true, false);
 	}
 	ft_close(fdin);
 	if (should_pipe)
@@ -198,7 +196,6 @@ static bool	exec_builtin_nofork(t_ctx *ctx, t_cmd *cmd)
 }
 
 // TODO error handling!!!!!!
-// TODO exitcode
 bool	exec_cmds(t_ctx *ctx)
 {
 	int		i;

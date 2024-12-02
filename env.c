@@ -6,23 +6,26 @@
 /*   By: rvandepu <rvandepu@student.42lehavre.fr>   +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/01 23:04:18 by rvandepu          #+#    #+#             */
-/*   Updated: 2024/11/12 14:13:01 by rvandepu         ###   ########.fr       */
+/*   Updated: 2024/12/02 07:48:17 by rvandepu         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "env.h"
+#include "minishell.h"
 
-bool	env_set(t_env **env, char *var)
+bool	env_set(t_ctx *ctx, char *var)
 {
+	t_env	**env;
+
+	env = &ctx->env;
 	while (*env && _env_namecmp(var, (*env)->var) != 0)
 		env = &(*env)->next;
 	var = ft_strdup(var);
 	if (var == NULL)
-		return (false);
+		return (eno(ctx, E_MEM), false);
 	if (*env == NULL)
 		*env = ft_calloc(1, sizeof(t_env));
 	if (*env == NULL)
-		return (free(var), false);
+		return (eno(ctx, E_MEM), free(var), false);
 	free((*env)->var);
 	(*env)->var = var;
 	(*env)->val = ft_strchr((*env)->var, '=');

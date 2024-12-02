@@ -6,7 +6,7 @@
 /*   By: rvandepu <rvandepu@student.42lehavre.fr>   +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/13 16:33:31 by rvandepu          #+#    #+#             */
-/*   Updated: 2024/11/14 01:50:59 by rvandepu         ###   ########.fr       */
+/*   Updated: 2024/12/01 12:38:05 by rvandepu         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,7 +20,8 @@ bool	bt_env(t_ctx *ctx, t_cmd *cmd)
 	var = ctx->env;
 	while (var)
 	{
-		ft_printf("%s\n", var->var);
+		if (_env_namecmp(var->var, "PS1") != 0)
+			ft_printf("%s\n", var->var);
 		var = var->next;
 	}
 	return (true);

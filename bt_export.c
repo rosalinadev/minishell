@@ -6,16 +6,32 @@
 /*   By: rvandepu <rvandepu@student.42lehavre.fr>   +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/13 16:33:26 by rvandepu          #+#    #+#             */
-/*   Updated: 2024/11/25 04:22:52 by rvandepu         ###   ########.fr       */
+/*   Updated: 2024/12/02 07:49:40 by rvandepu         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
 
+static bool	is_valid_identifier(char *s)
+{
+	int	i;
+
+	i = 0;
+	if (ft_isdigit(s[i]))
+		return (false);
+	while (ft_isalnum(s[i]) || s[i] == '_')
+		i++;
+	if (s[i] == '=' || s[i] == '\0')
+		return (true);
+	return (false);
+}
+
 static bool	handle_argument(t_ctx *ctx, char **arg)
 {
 	char	*str;
 
+	if (!is_valid_identifier(*arg))
+		return (eno(ctx, E_ARGS_IDENTIFIER), false);
 	if (!ft_strchr(*arg, '='))
 	{
 		str = env_get(ctx->env, *arg);
@@ -25,13 +41,12 @@ static bool	handle_argument(t_ctx *ctx, char **arg)
 		free(*arg);
 		*arg = str;
 	}
-	if (!env_set(&ctx->env, *arg))
-		return (eno(ctx, E_MEM), false);
+	if (!env_set(ctx, *arg))
+		return (false);
 	return (true);
 }
 
 // TODO :)
-// TODO identifier check
 bool	bt_export(t_ctx *ctx, t_cmd *cmd)
 {
 	int		argi;
@@ -42,7 +57,10 @@ bool	bt_export(t_ctx *ctx, t_cmd *cmd)
 	while (argi < cmd->argc)
 	{
 		if (!handle_argument(ctx, &cmd->argv[argi]))
-			err_p_clear("export", &ctx->eno);
+		{
+			ft_fprintf(stderr, "export: '%s': ", cmd->argv[argi]);
+			err_p_clear(NULL, &ctx->err);
+		}
 		argi++;
 	}
 	return (true);

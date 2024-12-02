@@ -6,13 +6,14 @@
 /*   By: rvandepu <rvandepu@student.42lehavre.fr>   +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/07 19:59:38 by rvandepu          #+#    #+#             */
-/*   Updated: 2024/11/27 04:21:00 by rvandepu         ###   ########.fr       */
+/*   Updated: 2024/12/02 07:57:56 by rvandepu         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef MINISHELL_H
 # define MINISHELL_H
 
+# include <errno.h>
 # include <fcntl.h>
 # include <stdio.h>
 # include <stdint.h>
@@ -24,12 +25,11 @@
 # include <readline/history.h>
 # include <readline/readline.h>
 # include "defaults.h"
-# include "env.h"
 # include "libft.h"
 
 # define EXIT_PARSER_FAILURE 2
 
-typedef enum e_err
+typedef enum e_eno
 {
 	E__NOPRINT = -1,
 	E__UNKNOWN = 0,
@@ -45,10 +45,28 @@ typedef enum e_err
 	E_ARGS_TOO_MANY,
 	E_ARGS_NUMERIC,
 	E_EXECVE,
+	E_PIPE,
+	E_FORK,
+	E_CHDIR,
 	E_CMD_NOT_FOUND,
 	E_HOMEUNSET,
 	E__MAX
+}	t_eno;
+
+typedef struct s_err
+{
+	t_eno	eno;
+	int		errsv;
 }	t_err;
+
+extern char	**environ;
+
+typedef struct s_env
+{
+	struct s_env	*next;
+	char			*var;
+	char			*val;
+}	t_env;
 
 typedef struct s_redir
 {
@@ -68,7 +86,7 @@ typedef struct s_cmd
 
 typedef struct s_ctx
 {
-	t_err	eno;
+	t_err	err;
 	t_env	*env;
 	int		cmd_count;
 	t_cmd	*cmds;
@@ -105,9 +123,20 @@ typedef struct s_parser
 void	free_cmds(t_ctx *ctx);
 
 // error.c
-void	err_p(const char *s, t_err eno);
-void	err_p_clear(const char *s, t_err *eno);
-void	eno(t_ctx *ctx, t_err eno);
+void	err_p(const char *s, t_err *err);
+void	err_p_clear(const char *s, t_err *err);
+void	eno(t_ctx *ctx, t_eno eno);
+
+// env.c
+bool	env_set(t_ctx *ctx, char *var);
+bool	env_del(t_env **env, char *name);
+char	*env_get(t_env *env, char *name);
+char	**env_environ(t_env *start);
+
+// env_utils.c
+int		_env_namecmp(char *var1, char *var2);
+bool	env_init(t_ctx *ctx, char **environ);
+void	env_clear(t_env **env);
 
 /*
  * Parsing

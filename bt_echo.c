@@ -6,13 +6,13 @@
 /*   By: rvandepu <rvandepu@student.42lehavre.fr>   +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/13 16:32:56 by rvandepu          #+#    #+#             */
-/*   Updated: 2024/11/27 03:36:30 by rvandepu         ###   ########.fr       */
+/*   Updated: 2024/12/02 06:40:54 by rvandepu         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
 
-static bool	has_opt_n(char *str)
+static bool	is_dash_n(char *str)
 {
 	int	i;
 
@@ -30,7 +30,6 @@ static bool	has_opt_n(char *str)
 	return (false);
 }
 
-// TODO echo -n -n -n jtm chayanne
 bool	bt_echo(t_ctx *ctx, t_cmd *cmd)
 {
 	int		i;
@@ -38,9 +37,9 @@ bool	bt_echo(t_ctx *ctx, t_cmd *cmd)
 
 	(void)ctx;
 	opt_no_nl = false;
-	if (cmd->argc >= 2)
-		opt_no_nl = has_opt_n(cmd->argv[1]);
-	i = 1 + opt_no_nl;
+	i = 0;
+	while (++i < cmd->argc && is_dash_n(cmd->argv[i]))
+		opt_no_nl = true;
 	while (i < cmd->argc)
 	{
 		ft_putstr_fd(cmd->argv[i], STDOUT_FILENO);
