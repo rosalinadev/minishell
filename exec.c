@@ -6,7 +6,7 @@
 /*   By: ekoubbi <ekoubbi@student.42lehavre.fr>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/05 14:37:54 by ekoubbi           #+#    #+#             */
-/*   Updated: 2024/12/02 07:34:33 by rvandepu         ###   ########.fr       */
+/*   Updated: 2024/12/02 19:29:57 by rvandepu         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,11 +35,7 @@ static void	closetab(int count, int *fd_tab)
 
 	i = 0;
 	while (i < count)
-	{
-		ft_close(&fd_tab[i]);
-		fd_tab[i] = -1;
-		i++;
-	}
+		ft_close(&fd_tab[i++]);
 }
 
 static void	ft_free(char **tab)
@@ -98,7 +94,7 @@ static bool	handle_redirection(t_ctx *ctx, t_cmd *cmd)
 		fd = open(cmd->redir[0].filename, O_RDONLY);
 		if (fd < 0)
 			ret = (eno(ctx, E_OPEN), false);
-		(dup2(fd, STDIN_FILENO), close(fd));
+		(dup2(fd, STDIN_FILENO), ft_close(&fd));
 	}
 	if (cmd->redir[1].filename != NULL)
 	{
@@ -110,7 +106,7 @@ static bool	handle_redirection(t_ctx *ctx, t_cmd *cmd)
 					O_WRONLY | O_CREAT | O_TRUNC, S_IRWXU);
 		if (fd < 0)
 			ret = (eno(ctx, E_OPEN), false);
-		(dup2(fd, STDOUT_FILENO), close(fd));
+		(dup2(fd, STDOUT_FILENO), ft_close(&fd));
 	}
 	return (ret);
 }
@@ -141,6 +137,7 @@ static bool	execute(t_ctx *ctx, t_cmd *cmd)
 	valid_path = get_valid_path(cmd->argv[0], ctx->env);
 	if (valid_path == NULL)
 		return (eno(ctx, E_CMD_NOT_FOUND), ctx->exitcode = 127, false);
+	ft_fprintf(stderr, "path: %s\n", valid_path);
 	env = env_environ(ctx->env);
 	if (!env)
 		return (eno(ctx, E_MEM), free(valid_path), false);
@@ -170,7 +167,7 @@ static bool	exec_fork(int *fdin, t_cmd *cmd, t_ctx *ctx, bool should_pipe)
 			dup2(pipefd[WRITE], STDOUT_FILENO);
 			closetab(2, pipefd);
 		}
-		if (cmd->argc && execute(ctx, cmd))
+		if (!cmd->argc || execute(ctx, cmd))
 			eno(ctx, E__NOPRINT);
 		return (ctx->should_exit = true, false);
 	}

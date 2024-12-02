@@ -6,7 +6,7 @@
 /*   By: rvandepu <rvandepu@student.42lehavre.fr>   +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/11 13:46:30 by rvandepu          #+#    #+#             */
-/*   Updated: 2024/12/01 07:51:06 by rvandepu         ###   ########.fr       */
+/*   Updated: 2024/12/02 18:31:18 by rvandepu         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -76,9 +76,6 @@ void	err_p_clear(const char *s, t_err *err)
 
 void	eno(t_ctx *ctx, t_eno eno)
 {
-	ctx->err.eno = E__UNKNOWN;
-	if (!(E__UNKNOWN < eno && eno < E__MAX))
-		return ;
 	ctx->err.eno = eno;
 	if (g_err_perror[eno])
 		ctx->err.errsv = errno;
