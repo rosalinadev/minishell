@@ -6,7 +6,7 @@
 /*   By: rvandepu <rvandepu@student.42lehavre.fr>   +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/11 13:46:30 by rvandepu          #+#    #+#             */
-/*   Updated: 2024/12/02 18:31:18 by rvandepu         ###   ########.fr       */
+/*   Updated: 2024/12/03 18:16:58 by rvandepu         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,6 +30,7 @@ static const char	*g_errstr[E__MAX] = {\
 	[E_FORK] = "fork() failed", \
 	[E_CHDIR] = "Could not change directory", \
 	[E_CMD_NOT_FOUND] = "Command not found", \
+	[E_CMD_IS_DIR] = "Is a directory", \
 	[E_HOMEUNSET] = "HOME not set", \
 };
 
@@ -46,7 +47,6 @@ void	err_p(const char *s, t_err *err)
 {
 	bool		valid_eno;
 	const char	*errstr;
-	char		*eol;
 
 	if (err->eno == E__NOPRINT)
 		return ;
@@ -54,18 +54,18 @@ void	err_p(const char *s, t_err *err)
 	errstr = g_errstr[E__UNKNOWN];
 	if (valid_eno && g_errstr[err->eno])
 		errstr = g_errstr[err->eno];
-	eol = "\n";
-	if (valid_eno && g_err_perror[err->eno])
-		eol = ": ";
-	if (s && *s)
-		ft_fprintf(stderr, "%s: %s%s", s, errstr, eol);
-	else
-		ft_fprintf(stderr, "%s%s", errstr, eol);
 	if (valid_eno && g_err_perror[err->eno])
 	{
-		errno = err->errsv;
-		perror(NULL);
+		if (s && *s)
+			ft_fprintf(stderr, "%s: %s: %s\n", s, errstr, strerror(err->errsv));
+		else
+			ft_fprintf(stderr, "%s: %s\n", errstr, strerror(err->errsv));
+		return ;
 	}
+	if (s && *s)
+		ft_fprintf(stderr, "%s: %s\n", s, errstr);
+	else
+		ft_fprintf(stderr, "%s\n", errstr);
 }
 
 void	err_p_clear(const char *s, t_err *err)
@@ -77,8 +77,13 @@ void	err_p_clear(const char *s, t_err *err)
 void	eno(t_ctx *ctx, t_eno eno)
 {
 	ctx->err.eno = eno;
-	if (g_err_perror[eno])
-		ctx->err.errsv = errno;
+	ctx->err.errsv = errno;
 	if (eno == E_MEM)
 		ctx->should_exit = true;
+}
+
+void	enosv(t_ctx *ctx, t_eno errnum, int errsv)
+{
+	eno(ctx, errnum);
+	ctx->err.errsv = errsv;
 }

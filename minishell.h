@@ -6,7 +6,7 @@
 /*   By: rvandepu <rvandepu@student.42lehavre.fr>   +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/07 19:59:38 by rvandepu          #+#    #+#             */
-/*   Updated: 2024/12/02 07:57:56 by rvandepu         ###   ########.fr       */
+/*   Updated: 2024/12/03 16:59:48 by rvandepu         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,6 +20,7 @@
 # include <stdlib.h>
 # include <unistd.h>
 # include <stdbool.h>
+# include <sys/stat.h>
 # include <sys/wait.h>
 # include <sys/types.h>
 # include <readline/history.h>
@@ -49,6 +50,7 @@ typedef enum e_eno
 	E_FORK,
 	E_CHDIR,
 	E_CMD_NOT_FOUND,
+	E_CMD_IS_DIR,
 	E_HOMEUNSET,
 	E__MAX
 }	t_eno;
@@ -126,6 +128,7 @@ void	free_cmds(t_ctx *ctx);
 void	err_p(const char *s, t_err *err);
 void	err_p_clear(const char *s, t_err *err);
 void	eno(t_ctx *ctx, t_eno eno);
+void	enosv(t_ctx *ctx, t_eno errnum, int errsv);
 
 // env.c
 bool	env_set(t_ctx *ctx, char *var);

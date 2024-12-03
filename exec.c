@@ -6,7 +6,7 @@
 /*   By: ekoubbi <ekoubbi@student.42lehavre.fr>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/05 14:37:54 by ekoubbi           #+#    #+#             */
-/*   Updated: 2024/12/02 19:29:57 by rvandepu         ###   ########.fr       */
+/*   Updated: 2024/12/03 19:00:36 by rvandepu         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -51,38 +51,6 @@ static void	ft_free(char **tab)
 	free(tab);
 }
 
-// TODO less mallocs?
-// TODO test invalid PATH
-// FIXME . is in always in path
-static char	*get_valid_path(char *cmd, t_env *env)
-{
-	char	*path_line;
-	char	**array_env;
-	char	*path;
-	int		i;
-
-	if (cmd == NULL)
-		return (NULL);
-	if (access(cmd, X_OK) == 0)
-		return (ft_strdup(cmd));
-	path_line = env_get(env, "PATH");
-	if (path_line == NULL)
-		path_line = ".";
-	array_env = ft_split(path_line, ':');
-	i = 0;
-	while (array_env[i])
-	{
-		path = ft_strjoinv(3, array_env[i], "/", cmd);
-		if (access(path, X_OK) == 0)
-			return (ft_free(array_env), path);
-		free(path);
-		i++;
-	}
-	ft_free(array_env);
-	return (NULL);
-}
-
-// TODO check error handling
 static bool	handle_redirection(t_ctx *ctx, t_cmd *cmd)
 {
 	int		fd;
@@ -124,30 +92,75 @@ static void	run_bt(t_ctx *ctx, t_cmd *cmd)
 	}
 }
 
-// TODO handle redirect errors
+static bool	_try_execve_path(t_ctx *ctx, t_cmd *cmd, char **env, int *errsv)
+{
+	char		**paths;
+	int			i;
+	char		*command;
+	struct stat	buf;
+
+	paths = ft_split(env_get(ctx->env, "PATH"), ':');
+	if (paths == NULL)
+		return (enosv(ctx, E_MEM, ENOMEM), false);
+	i = 0;
+	while (paths[i])
+	{
+		command = ft_strjoinv(3, paths[i], "/", cmd->argv[0]);
+		if (command == NULL)
+			return (eno(ctx, E_MEM), ft_free(paths), false);
+		if (stat(command, &buf) == 0 && !S_ISDIR(buf.st_mode))
+		{
+			execve(command, cmd->argv, env);
+			*errsv = errno;
+			eno(ctx, E_EXECVE);
+		}
+		free(command);
+		i++;
+	}
+	ft_free(paths);
+	return (true);
+}
+
+bool	try_execve(t_ctx *ctx, t_cmd *cmd, char **env)
+{
+	int			errsv;
+	struct stat	buf;
+
+	errsv = ENOENT;
+	if (ft_strchr(cmd->argv[0], '/') || env_get(ctx->env, "PATH") == NULL)
+	{
+		execve(cmd->argv[0], cmd->argv, env);
+		errsv = errno;
+		eno(ctx, E_EXECVE);
+		if (stat(cmd->argv[0], &buf) == 0 && S_ISDIR(buf.st_mode))
+			eno(ctx, E_CMD_IS_DIR);
+	}
+	else
+		if (!_try_execve_path(ctx, cmd, env, &errsv))
+			return (false);
+	if (errsv == ENOENT)
+		return (eno(ctx, E_CMD_NOT_FOUND), ctx->exitcode = 127, false);
+	return (ctx->exitcode = 126, false);
+}
+
 static bool	execute(t_ctx *ctx, t_cmd *cmd)
 {
-	char	*valid_path;
 	char	**env;
 
 	if (!handle_redirection(ctx, cmd))
-		return (false);
+		return (ctx->exitcode = EXIT_FAILURE, false);
 	if (get_builtin(cmd))
 		return (run_bt(ctx, cmd), true);
-	valid_path = get_valid_path(cmd->argv[0], ctx->env);
-	if (valid_path == NULL)
-		return (eno(ctx, E_CMD_NOT_FOUND), ctx->exitcode = 127, false);
-	ft_fprintf(stderr, "path: %s\n", valid_path);
 	env = env_environ(ctx->env);
 	if (!env)
-		return (eno(ctx, E_MEM), free(valid_path), false);
-	execve(valid_path, cmd->argv, env);
-	eno(ctx, E_EXECVE);
-	ctx->exitcode = EXIT_FAILURE;
-	return (free(valid_path), free(env), false);
+		return (eno(ctx, E_MEM), false);
+	try_execve(ctx, cmd, env);
+	ft_fprintf(stderr, "%s: %s: ", SHELL_NAME, cmd->argv[0]);
+	err_p_clear(NULL, &ctx->err);
+	eno(ctx, E__NOPRINT);
+	return (free(env), false);
 }
 
-// TODO correctly handle errors
 // yes, you're reading this right, the child returns to the main to exit
 static bool	exec_fork(int *fdin, t_cmd *cmd, t_ctx *ctx, bool should_pipe)
 {
@@ -179,20 +192,20 @@ static bool	exec_fork(int *fdin, t_cmd *cmd, t_ctx *ctx, bool should_pipe)
 
 static bool	exec_builtin_nofork(t_ctx *ctx, t_cmd *cmd)
 {
-	int	fd[2];
+	int		fd[2];
+	bool	ret;
 
 	fd[0] = dup(STDIN_FILENO);
 	fd[1] = dup(STDOUT_FILENO);
 	if (fd[0] < 0 || fd[1] < 0)
 		return (closetab(2, fd), false);
-	execute(ctx, cmd);
+	ret = execute(ctx, cmd);
 	dup2(fd[0], STDIN_FILENO);
 	dup2(fd[1], STDOUT_FILENO);
 	closetab(2, fd);
-	return (true);
+	return (ret);
 }
 
-// TODO error handling!!!!!!
 bool	exec_cmds(t_ctx *ctx)
 {
 	int		i;
