@@ -6,7 +6,7 @@
 /*   By: rvandepu <rvandepu@student.42lehavre.fr>   +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/07 19:59:38 by rvandepu          #+#    #+#             */
-/*   Updated: 2024/12/03 16:59:48 by rvandepu         ###   ########.fr       */
+/*   Updated: 2024/12/03 21:29:23 by rvandepu         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,6 +27,13 @@
 # include <readline/readline.h>
 # include "defaults.h"
 # include "libft.h"
+
+typedef enum e_setsig
+{
+	S_INTERACTIVE,
+	S_IGNORE,
+	S_DEFAULT,
+}	t_setsig;
 
 # define EXIT_PARSER_FAILURE 2
 
@@ -123,6 +130,9 @@ typedef struct s_parser
 // minishell.c
 // TODO move
 void	free_cmds(t_ctx *ctx);
+
+// signals.c
+void	set_signals(t_setsig set);
 
 // error.c
 void	err_p(const char *s, t_err *err);

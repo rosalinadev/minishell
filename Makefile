@@ -6,12 +6,13 @@
 #    By: rvandepu <rvandepu@student.42lehavre.fr>   +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/01/06 16:11:02 by rvandepu          #+#    #+#              #
-#    Updated: 2024/11/26 20:28:23 by rvandepu         ###   ########.fr        #
+#    Updated: 2024/12/03 21:24:50 by rvandepu         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
 NAME  := minishell
 FILES := $(NAME).c \
+		 signals.c \
 		 error.c \
 		 env.c \
 		 env_utils.c \

@@ -6,7 +6,7 @@
 /*   By: rvandepu <rvandepu@student.42lehavre.fr>   +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/05 19:14:24 by rvandepu          #+#    #+#             */
-/*   Updated: 2024/12/02 07:53:29 by rvandepu         ###   ########.fr       */
+/*   Updated: 2024/12/03 21:16:08 by rvandepu         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,7 +30,9 @@ static bool	loop(t_ctx *ctx)
 	prompt = env_get(ctx->env, "PS1");
 	if (!prompt)
 		prompt = "$ ";
+	set_signals(S_INTERACTIVE);
 	cmdline = readline(prompt);
+	set_signals(S_IGNORE);
 	if (!cmdline)
 		return (ctx->should_exit = true);
 	add_history(cmdline);
