@@ -6,7 +6,7 @@
 #    By: rvandepu <rvandepu@student.42lehavre.fr>   +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/01/06 16:11:02 by rvandepu          #+#    #+#              #
-#    Updated: 2024/12/03 21:24:50 by rvandepu         ###   ########.fr        #
+#    Updated: 2024/12/07 20:56:12 by rvandepu         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -18,10 +18,11 @@ FILES := $(NAME).c \
 		 env_utils.c \
 		 parser.c \
 		 parser_utils.c \
-		 parse_cmd.c \
-		 parse_default.c \
+		 parse_command.c \
+		 parse_argument.c \
 		 parse_var.c \
 		 parse_doublequote.c \
+		 heredoc.c \
 		 exec.c \
 		 builtin.c \
 		 bt_debug_cmds.c \

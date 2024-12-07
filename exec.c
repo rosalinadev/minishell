@@ -6,7 +6,7 @@
 /*   By: ekoubbi <ekoubbi@student.42lehavre.fr>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/05 14:37:54 by ekoubbi           #+#    #+#             */
-/*   Updated: 2024/12/03 21:28:29 by rvandepu         ###   ########.fr       */
+/*   Updated: 2024/12/07 22:18:47 by rvandepu         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -67,11 +67,11 @@ static bool	handle_redirection(t_ctx *ctx, t_cmd *cmd)
 	if (cmd->redir[1].filename != NULL)
 	{
 		if (cmd->redir[1].append)
-			fd = open(cmd->redir[1].filename,
-					O_WRONLY | O_CREAT | O_APPEND, S_IRWXU);
+			fd = open(cmd->redir[1].filename, O_WRONLY | O_CREAT | O_APPEND,
+					S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH | S_IWOTH);
 		else
-			fd = open(cmd->redir[1].filename,
-					O_WRONLY | O_CREAT | O_TRUNC, S_IRWXU);
+			fd = open(cmd->redir[1].filename, O_WRONLY | O_CREAT | O_TRUNC,
+					S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH | S_IWOTH);
 		if (fd < 0)
 			ret = (eno(ctx, E_OPEN), false);
 		(dup2(fd, STDOUT_FILENO), ft_close(&fd));
@@ -175,6 +175,7 @@ static bool	exec_fork(int *fdin, t_cmd *cmd, t_ctx *ctx, bool should_pipe)
 		return (eno(ctx, E_FORK), closetab(2, pipefd), false);
 	if (cmd->pid == 0)
 	{
+		ctx->is_child = true;
 		dup2(*fdin, STDIN_FILENO);
 		ft_close(fdin);
 		if (should_pipe)

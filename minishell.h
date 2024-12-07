@@ -6,7 +6,7 @@
 /*   By: rvandepu <rvandepu@student.42lehavre.fr>   +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/07 19:59:38 by rvandepu          #+#    #+#             */
-/*   Updated: 2024/12/03 21:29:23 by rvandepu         ###   ########.fr       */
+/*   Updated: 2024/12/07 22:50:33 by rvandepu         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,6 +31,7 @@
 typedef enum e_setsig
 {
 	S_INTERACTIVE,
+	S_HEREDOC,
 	S_IGNORE,
 	S_DEFAULT,
 }	t_setsig;
@@ -55,10 +56,12 @@ typedef enum e_eno
 	E_EXECVE,
 	E_PIPE,
 	E_FORK,
+	E_WRITE,
 	E_CHDIR,
 	E_CMD_NOT_FOUND,
 	E_CMD_IS_DIR,
 	E_HOMEUNSET,
+	E_HD_NO_DELIM,
 	E__MAX
 }	t_eno;
 
@@ -67,8 +70,6 @@ typedef struct s_err
 	t_eno	eno;
 	int		errsv;
 }	t_err;
-
-extern char	**environ;
 
 typedef struct s_env
 {
@@ -81,6 +82,7 @@ typedef struct s_redir
 {
 	char	*filename;
 	bool	is_heredoc;
+	bool	read_heredoc;
 	bool	quoted;
 	bool	append;
 }	t_redir;
@@ -101,19 +103,21 @@ typedef struct s_ctx
 	t_cmd	*cmds;
 	bool	should_exit;
 	uint8_t	exitcode;
+	bool	is_child;
 	void	(*debug_hook)(struct s_ctx *);
 }	t_ctx;
 
 # define WHITESPACE " \t"
 
-typedef enum e_token
+typedef enum e_parse
 {
-	T_INVALID = 0,
-	T_CMD,
-	T_DEFAULT,
-	T_DOUBLEQUOTE,
-	T__MAX,
-}	t_token;
+	P_INVALID = 0,
+	P_COMMAND,
+	P_ARGUMENT,
+	P_DOUBLEQUOTE,
+	P_HEREDOC,
+	P__MAX,
+}	t_parse;
 
 typedef struct s_parser
 {
@@ -122,7 +126,7 @@ typedef struct s_parser
 	t_redir	*parsing_redir;
 	char	**cmdline;
 	bool	has_skipped;
-	t_token	type;
+	t_parse	type;
 	int		count;
 	char	**tokens;
 }	t_parser;
@@ -141,7 +145,7 @@ void	eno(t_ctx *ctx, t_eno eno);
 void	enosv(t_ctx *ctx, t_eno errnum, int errsv);
 
 // env.c
-bool	env_set(t_ctx *ctx, char *var);
+bool	env_set(t_env **env, char *var);
 bool	env_del(t_env **env, char *name);
 char	*env_get(t_env *env, char *name);
 char	**env_environ(t_env *start);
@@ -162,21 +166,19 @@ int		parse_cmdline(t_ctx *ctx, char *cmdline, int depth);
 // parser_utils.c
 void	free_cmd(t_cmd *cmd);
 char	*dup_token(char *src, int len);
-void	get_parser(t_parser *parser, t_parser *parent, t_token type);
+void	get_parser(t_parser *parser, t_parser *parent, t_parse type);
 void	free_parser(t_parser *parser);
-bool	sub_parser(t_parser *parent, t_token type, char **token);
+bool	sub_parser(t_parser *parent, t_parse type, char **token);
 
-// parse_cmd.c
-bool	parse_cmd(t_parser *parser, char **token);
-
-// parse_default.c
-bool	parse_default(t_parser *parser, char **token);
-
-// parse_var.c
+// parse_{command,argument,var,doublequote}.c
+bool	parse_command(t_parser *parser, char **token);
+bool	parse_argument(t_parser *parser, char **token);
 bool	parse_var(t_parser *parser, char **token);
-
-// parse_doublequote.c
 bool	parse_doublequote(t_parser *parser, char **token);
+
+// heredoc.c
+bool	read_heredocs(t_ctx *ctx);
+bool	parse_heredoc(t_parser *parser, char **token);
 
 /*
  * Executing

@@ -6,7 +6,7 @@
 /*   By: rvandepu <rvandepu@student.42lehavre.fr>   +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/13 06:49:12 by rvandepu          #+#    #+#             */
-/*   Updated: 2024/11/25 04:36:00 by rvandepu         ###   ########.fr       */
+/*   Updated: 2024/12/07 20:57:25 by rvandepu         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,6 +18,8 @@ void	free_cmd(t_cmd *cmd)
 		while (cmd->argc)
 			free(cmd->argv[--cmd->argc]);
 	free(cmd->argv);
+	if (cmd->redir[0].is_heredoc)
+		unlink(cmd->redir[0].filename);
 	free(cmd->redir[0].filename);
 	free(cmd->redir[1].filename);
 }
@@ -34,7 +36,7 @@ char	*dup_token(char *src, int len)
 	return (token);
 }
 
-void	get_parser(t_parser *parser, t_parser *parent, t_token type)
+void	get_parser(t_parser *parser, t_parser *parent, t_parse type)
 {
 	*parser = (t_parser){};
 	if (parent)
@@ -51,14 +53,14 @@ void	free_parser(t_parser *parser)
 	free(parser->tokens);
 }
 
-bool	sub_parser(t_parser *parent, t_token type, char **token)
+bool	sub_parser(t_parser *parent, t_parse type, char **token)
 {
 	t_parser	parser;
 
 	get_parser(&parser, parent, type);
 	if (!parse_tokens(&parser, 0))
 		return (false);
-	if (parser.type != T_DOUBLEQUOTE && parser.count == 0)
+	if (parser.type != P_DOUBLEQUOTE && parser.count == 0)
 		return (free_parser(&parser), parent->has_skipped = true, true);
 	*token = ft_strjoin(parser.count, parser.tokens);
 	if (*token == NULL)

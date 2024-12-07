@@ -6,7 +6,7 @@
 /*   By: rvandepu <rvandepu@student.42lehavre.fr>   +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/05 19:14:24 by rvandepu          #+#    #+#             */
-/*   Updated: 2024/12/03 21:16:08 by rvandepu         ###   ########.fr       */
+/*   Updated: 2024/12/07 22:42:16 by rvandepu         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,7 +15,11 @@
 void	free_cmds(t_ctx *ctx)
 {
 	while (ctx->cmd_count--)
+	{
+		if (!ctx->is_child && ctx->cmds[ctx->cmd_count].redir[0].is_heredoc)
+			unlink(ctx->cmds[ctx->cmd_count].redir[0].filename);
 		free_cmd(&ctx->cmds[ctx->cmd_count]);
+	}
 	free(ctx->cmds);
 	ctx->cmds = NULL;
 }
@@ -40,14 +44,18 @@ static bool	loop(t_ctx *ctx)
 		return (err_p_clear(SHELL_NAME": error during parsing", &ctx->err),
 			free(cmdline), true);
 	free(cmdline);
+	if (ctx->cmd_count && !read_heredocs(ctx))
+		return (err_p_clear(SHELL_NAME": error reading heredocs", &ctx->err),
+			free_cmds(ctx), true);
 	if (ctx->debug_hook)
 		ctx->debug_hook(ctx);
-	if (ctx->cmd_count)
-		if (!exec_cmds(ctx))
-			err_p_clear(SHELL_NAME": error during exec", &ctx->err);
+	if (ctx->cmd_count && !exec_cmds(ctx))
+		err_p_clear(SHELL_NAME": error during exec", &ctx->err);
 	free_cmds(ctx);
 	return (true);
 }
+
+extern char	**environ;
 
 // TODO idk finish the project
 int	main(void)

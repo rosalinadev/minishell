@@ -6,7 +6,7 @@
 /*   By: rvandepu <rvandepu@student.42lehavre.fr>   +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/10 21:33:25 by rvandepu          #+#    #+#             */
-/*   Updated: 2024/11/25 04:34:40 by rvandepu         ###   ########.fr       */
+/*   Updated: 2024/12/07 20:50:13 by rvandepu         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -40,7 +40,7 @@ static bool	parse_special(t_parser *parser, char **token)
 	else if (**parser->cmdline == '$')
 		return (parse_var(parser, token));
 	else if (**parser->cmdline == '"')
-		return (++*parser->cmdline, sub_parser(parser, T_DOUBLEQUOTE, token));
+		return (++*parser->cmdline, sub_parser(parser, P_DOUBLEQUOTE, token));
 	else if (**parser->cmdline == '<' || **parser->cmdline == '>')
 		return (true);
 	else if (**parser->cmdline == '|')
@@ -50,7 +50,7 @@ static bool	parse_special(t_parser *parser, char **token)
 
 #define DELIM "\'\"$<>|"
 
-bool	parse_default(t_parser *parser, char **token)
+bool	parse_argument(t_parser *parser, char **token)
 {
 	char	*cmdline;
 	int		i;

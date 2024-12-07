@@ -6,7 +6,7 @@
 /*   By: rvandepu <rvandepu@student.42lehavre.fr>   +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/08 21:19:35 by rvandepu          #+#    #+#             */
-/*   Updated: 2024/11/25 04:33:38 by rvandepu         ###   ########.fr       */
+/*   Updated: 2024/12/07 20:54:17 by rvandepu         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,10 +19,10 @@ static bool	parse_redirect(t_parser *parser, t_redir *redir)
 	while (**parser->cmdline && ft_in(**parser->cmdline, WHITESPACE))
 		++*parser->cmdline;
 	parser->parsing_redir = redir;
-	if (!sub_parser(parser, T_DEFAULT, &redir->filename)
+	if (!sub_parser(parser, P_ARGUMENT, &redir->filename)
 		|| redir->filename == NULL)
 	{
-		if (redir->is_heredoc)
+		if (redir->read_heredoc)
 			eno(parser->ctx, E_HD_EXP_DELIM);
 		else
 			eno(parser->ctx, E_RD_EXP_FILENAME);
@@ -39,7 +39,7 @@ static bool	parse_redirects(t_parser *parser)
 	{
 		parser->redir[0] = (free(parser->redir[0].filename), (t_redir){});
 		if ((*parser->cmdline)[1] == '<')
-			return (*parser->cmdline += 2, parser->redir[0].is_heredoc = true,
+			return (*parser->cmdline += 2, parser->redir[0].read_heredoc = true,
 				parse_redirect(parser, &parser->redir[0]));
 		return (++*parser->cmdline, parse_redirect(parser, &parser->redir[0]));
 	}
@@ -54,7 +54,7 @@ static bool	parse_redirects(t_parser *parser)
 	return (false);
 }
 
-bool	parse_cmd(t_parser *parser, char **token)
+bool	parse_command(t_parser *parser, char **token)
 {
 	char	*cmdline;
 	int		i;
@@ -68,5 +68,5 @@ bool	parse_cmd(t_parser *parser, char **token)
 		return (true);
 	if (ft_in(cmdline[i], REDIRECT))
 		return (parse_redirects(parser));
-	return (sub_parser(parser, T_DEFAULT, token));
+	return (sub_parser(parser, P_ARGUMENT, token));
 }

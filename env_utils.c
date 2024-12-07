@@ -6,7 +6,7 @@
 /*   By: rvandepu <rvandepu@student.42lehavre.fr>   +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/01 23:04:17 by rvandepu          #+#    #+#             */
-/*   Updated: 2024/12/02 07:53:43 by rvandepu         ###   ########.fr       */
+/*   Updated: 2024/12/07 22:51:42 by rvandepu         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -49,8 +49,8 @@ static bool	_init_extras(t_ctx *ctx)
 		n = 1;
 	}
 	ft_itoa_buf(n, shlvl + 6);
-	if (!env_set(ctx, shlvl) || !env_set(ctx, ps1))
-		return (false);
+	if (!env_set(&ctx->env, shlvl) || !env_set(&ctx->env, ps1))
+		return (eno(ctx, E_MEM), false);
 	return (true);
 }
 
@@ -58,8 +58,8 @@ bool	env_init(t_ctx *ctx, char **environ)
 {
 	while (*environ)
 	{
-		if (!env_set(ctx, *environ))
-			return (env_clear(&ctx->env), false);
+		if (!env_set(&ctx->env, *environ))
+			return (eno(ctx, E_MEM), env_clear(&ctx->env), false);
 		environ++;
 	}
 	if (!_init_extras(ctx))

@@ -6,7 +6,7 @@
 /*   By: rvandepu <rvandepu@student.42lehavre.fr>   +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/11 13:46:30 by rvandepu          #+#    #+#             */
-/*   Updated: 2024/12/03 18:16:58 by rvandepu         ###   ########.fr       */
+/*   Updated: 2024/12/07 19:27:33 by rvandepu         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,10 +28,12 @@ static const char	*g_errstr[E__MAX] = {\
 	[E_EXECVE] = "execve() failed", \
 	[E_PIPE] = "pipe() failed", \
 	[E_FORK] = "fork() failed", \
+	[E_WRITE] = "write() failed", \
 	[E_CHDIR] = "Could not change directory", \
 	[E_CMD_NOT_FOUND] = "Command not found", \
 	[E_CMD_IS_DIR] = "Is a directory", \
 	[E_HOMEUNSET] = "HOME not set", \
+	[E_HD_NO_DELIM] = "No delimiter ending here-document", \
 };
 
 static const bool	g_err_perror[E__MAX] = {\
@@ -40,6 +42,7 @@ static const bool	g_err_perror[E__MAX] = {\
 	[E_EXECVE] = true, \
 	[E_PIPE] = true, \
 	[E_FORK] = true, \
+	[E_WRITE] = true, \
 	[E_CHDIR] = true, \
 };
 
