@@ -6,13 +6,12 @@
 /*   By: rvandepu <rvandepu@student.42lehavre.fr>   +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/03 20:56:47 by rvandepu          #+#    #+#             */
-/*   Updated: 2024/12/07 22:44:59 by rvandepu         ###   ########.fr       */
+/*   Updated: 2024/12/08 11:10:05 by rvandepu         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
 
-// TODO SIGINT exit code 130
 static void	int_handler(int sig)
 {
 	(void)sig;

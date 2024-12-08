@@ -6,7 +6,7 @@
 /*   By: rvandepu <rvandepu@student.42lehavre.fr>   +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/05 11:35:00 by rvandepu          #+#    #+#             */
-/*   Updated: 2024/12/07 22:42:32 by rvandepu         ###   ########.fr       */
+/*   Updated: 2024/12/08 12:28:06 by rvandepu         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -114,11 +114,11 @@ bool	read_heredocs(t_ctx *ctx)
 			return (eno(ctx, E_OPEN), false);
 		if (!read_heredoc(ctx, ctx->cmds[i].redir, fd))
 			return (free_gnl(), close(fd), unlink(path), false);
-		(free_gnl(), close(fd), free(ctx->cmds[i].redir[0].filename));
+		(close(fd), free(ctx->cmds[i].redir[0].filename));
 		ctx->cmds[i].redir[0].filename = ft_strdup(path);
 		if (ctx->cmds[i].redir[0].filename == NULL)
 			return (eno(ctx, E_MEM), unlink(path), false);
 		ctx->cmds[i].redir[0].is_heredoc = true;
 	}
-	return (true);
+	return (free_gnl(), true);
 }

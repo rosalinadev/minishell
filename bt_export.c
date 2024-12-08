@@ -6,7 +6,7 @@
 /*   By: rvandepu <rvandepu@student.42lehavre.fr>   +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/13 16:33:26 by rvandepu          #+#    #+#             */
-/*   Updated: 2024/12/07 22:52:16 by rvandepu         ###   ########.fr       */
+/*   Updated: 2024/12/08 12:21:05 by rvandepu         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,7 +21,7 @@ static bool	is_valid_identifier(char *s)
 		return (false);
 	while (ft_isalnum(s[i]) || s[i] == '_')
 		i++;
-	if (s[i] == '=' || s[i] == '\0')
+	if (i && (s[i] == '=' || s[i] == '\0'))
 		return (true);
 	return (false);
 }
@@ -50,9 +50,11 @@ static bool	handle_argument(t_ctx *ctx, char **arg)
 bool	bt_export(t_ctx *ctx, t_cmd *cmd)
 {
 	int		argi;
+	bool	ret;
 
 	if (cmd->argc < 2)
 		return (bt_env(ctx, cmd));
+	ret = true;
 	argi = 1;
 	while (argi < cmd->argc)
 	{
@@ -60,8 +62,9 @@ bool	bt_export(t_ctx *ctx, t_cmd *cmd)
 		{
 			ft_fprintf(stderr, "export: '%s': ", cmd->argv[argi]);
 			err_p_clear(NULL, &ctx->err);
+			ret = false;
 		}
 		argi++;
 	}
-	return (true);
+	return (ret);
 }

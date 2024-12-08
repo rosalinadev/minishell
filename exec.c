@@ -6,7 +6,7 @@
 /*   By: ekoubbi <ekoubbi@student.42lehavre.fr>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/05 14:37:54 by ekoubbi           #+#    #+#             */
-/*   Updated: 2024/12/07 22:18:47 by rvandepu         ###   ########.fr       */
+/*   Updated: 2024/12/08 10:56:42 by rvandepu         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -141,8 +141,9 @@ bool	try_execve(t_ctx *ctx, t_cmd *cmd, char **env)
 		if (!_try_execve_path(ctx, cmd, env, &errsv))
 			return (false);
 	if (errsv == ENOENT)
-		return (eno(ctx, E_CMD_NOT_FOUND), ctx->exitcode = 127, false);
-	return (ctx->exitcode = 126, false);
+		return (eno(ctx, E_CMD_NOT_FOUND),
+			ctx->exitcode = EXIT_NOT_FOUND, false);
+	return (ctx->exitcode = EXIT_EXEC_ERROR, false);
 }
 
 static bool	execute(t_ctx *ctx, t_cmd *cmd)
@@ -225,6 +226,11 @@ bool	exec_cmds(t_ctx *ctx)
 	i = 0;
 	while (i < ctx->cmd_count)
 		waitpid(ctx->cmds[i++].pid, &status, 0);
-	ctx->exitcode = WEXITSTATUS(status);
+	if (WIFEXITED(status))
+		ctx->exitcode = WEXITSTATUS(status);
+	else if (WIFSIGNALED(status))
+		ctx->exitcode = EXIT_SIG + WTERMSIG(status);
+	else
+		ctx->exitcode = EXIT_EXEC_ERROR;
 	return (true);
 }

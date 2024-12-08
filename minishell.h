@@ -6,7 +6,7 @@
 /*   By: rvandepu <rvandepu@student.42lehavre.fr>   +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/07 19:59:38 by rvandepu          #+#    #+#             */
-/*   Updated: 2024/12/07 22:50:33 by rvandepu         ###   ########.fr       */
+/*   Updated: 2024/12/08 10:55:46 by rvandepu         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -37,6 +37,9 @@ typedef enum e_setsig
 }	t_setsig;
 
 # define EXIT_PARSER_FAILURE 2
+# define EXIT_EXEC_ERROR 126
+# define EXIT_NOT_FOUND 127
+# define EXIT_SIG 128
 
 typedef enum e_eno
 {

@@ -6,7 +6,7 @@
 #    By: rvandepu <rvandepu@student.42lehavre.fr>   +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/01/06 16:11:02 by rvandepu          #+#    #+#              #
-#    Updated: 2024/12/07 20:56:12 by rvandepu         ###   ########.fr        #
+#    Updated: 2024/12/08 12:53:57 by rvandepu         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -39,12 +39,13 @@ OBJ := $(FILES:%.c=%.o)
 CFLAGS += -Wall -Wextra -Werror
 
 # https://github.com/rosalinadev/libft
-LIBFT_DIR	:= libft
-LIBFT		:= libft.a
-LIBFT_PATH	:= $(LIBFT_DIR)/$(LIBFT)
-CPPFLAGS	+= -I$(LIBFT_DIR)
-LDFLAGS		+= -L$(LIBFT_DIR)
-LDLIBS		+= -lft
+LIBFT_DIR		:= libft
+LIBFT			:= libft.a
+LIBFT_PATH		:= $(LIBFT_DIR)/$(LIBFT)
+LIBFT_CPPFLAGS	:= -DBUFFER_SIZE=1
+CPPFLAGS		+= -I$(LIBFT_DIR)
+LDFLAGS			+= -L$(LIBFT_DIR)
+LDLIBS			+= -lft
 
 # readline
 LDLIBS += -lreadline
@@ -66,6 +67,6 @@ test: CFLAGS += -g -Wno-error
 test: re
 
 $(LIBFT_PATH):
-	$(MAKE) -s -C $(LIBFT_DIR) $(LIBFT) -j $$(nproc) CFLAGS="$(CFLAGS)"
+	CPPFLAGS="$(LIBFT_CPPFLAGS)" $(MAKE) -s -C $(LIBFT_DIR) $(LIBFT) -j $$(nproc) CFLAGS="$(CFLAGS)"
 
 $(NAME): $(OBJ) | $(LIBFT_PATH)
