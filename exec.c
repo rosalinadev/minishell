@@ -6,7 +6,7 @@
 /*   By: ekoubbi <ekoubbi@student.42lehavre.fr>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/05 14:37:54 by ekoubbi           #+#    #+#             */
-/*   Updated: 2024/12/08 10:56:42 by rvandepu         ###   ########.fr       */
+/*   Updated: 2024/12/08 17:15:34 by rvandepu         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,83 +14,6 @@
 
 #define WRITE 1
 #define READ 0
-
-static int	ft_close(int *fd)
-{
-	int	ret;
-
-	ret = 0;
-	if (*fd >= 0 && *fd != STDIN_FILENO
-		&& *fd != STDOUT_FILENO && *fd != STDERR_FILENO)
-	{
-		ret = close(*fd);
-		*fd = -1;
-	}
-	return (ret);
-}
-
-static void	closetab(int count, int *fd_tab)
-{
-	int	i;
-
-	i = 0;
-	while (i < count)
-		ft_close(&fd_tab[i++]);
-}
-
-static void	ft_free(char **tab)
-{
-	int	i;
-
-	i = 0;
-	while (tab[i])
-	{
-		free(tab[i]);
-		i++;
-	}
-	free(tab);
-}
-
-static bool	handle_redirection(t_ctx *ctx, t_cmd *cmd)
-{
-	int		fd;
-	bool	ret;
-
-	ret = true;
-	if (cmd->redir[0].filename != NULL)
-	{
-		fd = open(cmd->redir[0].filename, O_RDONLY);
-		if (fd < 0)
-			ret = (eno(ctx, E_OPEN), false);
-		(dup2(fd, STDIN_FILENO), ft_close(&fd));
-	}
-	if (cmd->redir[1].filename != NULL)
-	{
-		if (cmd->redir[1].append)
-			fd = open(cmd->redir[1].filename, O_WRONLY | O_CREAT | O_APPEND,
-					S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH | S_IWOTH);
-		else
-			fd = open(cmd->redir[1].filename, O_WRONLY | O_CREAT | O_TRUNC,
-					S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH | S_IWOTH);
-		if (fd < 0)
-			ret = (eno(ctx, E_OPEN), false);
-		(dup2(fd, STDOUT_FILENO), ft_close(&fd));
-	}
-	return (ret);
-}
-
-static void	run_bt(t_ctx *ctx, t_cmd *cmd)
-{
-	t_bt_f	bt;
-
-	bt = get_builtin(cmd);
-	ctx->exitcode = EXIT_SUCCESS;
-	if (!bt(ctx, cmd))
-	{
-		err_p_clear(cmd->argv[0], &ctx->err);
-		ctx->exitcode = EXIT_FAILURE;
-	}
-}
 
 static bool	_try_execve_path(t_ctx *ctx, t_cmd *cmd, char **env, int *errsv)
 {
@@ -107,7 +30,7 @@ static bool	_try_execve_path(t_ctx *ctx, t_cmd *cmd, char **env, int *errsv)
 	{
 		command = ft_strjoinv(3, paths[i], "/", cmd->argv[0]);
 		if (command == NULL)
-			return (eno(ctx, E_MEM), ft_free(paths), false);
+			return (eno(ctx, E_MEM), free_tab(paths), false);
 		if (stat(command, &buf) == 0 && !S_ISDIR(buf.st_mode))
 		{
 			set_signals(S_DEFAULT);
@@ -118,10 +41,10 @@ static bool	_try_execve_path(t_ctx *ctx, t_cmd *cmd, char **env, int *errsv)
 		}
 		free(command);
 	}
-	return (ft_free(paths), true);
+	return (free_tab(paths), true);
 }
 
-bool	try_execve(t_ctx *ctx, t_cmd *cmd, char **env)
+static bool	try_execve(t_ctx *ctx, t_cmd *cmd, char **env)
 {
 	int			errsv;
 	struct stat	buf;
@@ -146,14 +69,14 @@ bool	try_execve(t_ctx *ctx, t_cmd *cmd, char **env)
 	return (ctx->exitcode = EXIT_EXEC_ERROR, false);
 }
 
-static bool	execute(t_ctx *ctx, t_cmd *cmd)
+bool	execute(t_ctx *ctx, t_cmd *cmd)
 {
 	char	**env;
 
 	if (!handle_redirection(ctx, cmd))
 		return (ctx->exitcode = EXIT_FAILURE, false);
 	if (get_builtin(cmd))
-		return (run_bt(ctx, cmd), true);
+		return (run_builtin(ctx, cmd), true);
 	env = env_environ(ctx->env);
 	if (!env)
 		return (eno(ctx, E_MEM), false);
@@ -192,22 +115,6 @@ static bool	exec_fork(int *fdin, t_cmd *cmd, t_ctx *ctx, bool should_pipe)
 	if (should_pipe)
 		ft_close(&pipefd[WRITE]);
 	return (*fdin = pipefd[READ], true);
-}
-
-static bool	exec_builtin_nofork(t_ctx *ctx, t_cmd *cmd)
-{
-	int		fd[2];
-	bool	ret;
-
-	fd[0] = dup(STDIN_FILENO);
-	fd[1] = dup(STDOUT_FILENO);
-	if (fd[0] < 0 || fd[1] < 0)
-		return (closetab(2, fd), false);
-	ret = execute(ctx, cmd);
-	dup2(fd[0], STDIN_FILENO);
-	dup2(fd[1], STDOUT_FILENO);
-	closetab(2, fd);
-	return (ret);
 }
 
 bool	exec_cmds(t_ctx *ctx)

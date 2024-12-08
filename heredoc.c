@@ -6,7 +6,7 @@
 /*   By: rvandepu <rvandepu@student.42lehavre.fr>   +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/05 11:35:00 by rvandepu          #+#    #+#             */
-/*   Updated: 2024/12/08 12:28:06 by rvandepu         ###   ########.fr       */
+/*   Updated: 2024/12/08 15:59:21 by rvandepu         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,9 +16,14 @@ extern int	g_last_sig;
 
 static bool	get_line(t_ctx *ctx, char **line)
 {
+	char	*prompt;
+
+	prompt = env_get(ctx->env, "PS2");
+	if (!prompt)
+		prompt = "> ";
 	g_last_sig = 0;
 	set_signals(S_HEREDOC);
-	ft_fprintf(rl_outstream, "> ");
+	ft_fprintf(rl_outstream, prompt);
 	*line = get_next_line(STDIN_FILENO);
 	set_signals(S_IGNORE);
 	if (g_last_sig == SIGINT || *line == NULL || ft_strchr(*line, '\n') == NULL)

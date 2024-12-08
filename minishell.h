@@ -6,7 +6,7 @@
 /*   By: rvandepu <rvandepu@student.42lehavre.fr>   +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/07 19:59:38 by rvandepu          #+#    #+#             */
-/*   Updated: 2024/12/08 10:55:46 by rvandepu         ###   ########.fr       */
+/*   Updated: 2024/12/08 17:19:45 by rvandepu         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -135,7 +135,6 @@ typedef struct s_parser
 }	t_parser;
 
 // minishell.c
-// TODO move
 void	free_cmds(t_ctx *ctx);
 
 // signals.c
@@ -205,10 +204,19 @@ typedef enum e_bt
 typedef bool	(*t_bt_f)(t_ctx *ctx, t_cmd *cmd);
 
 // exec.c
+bool	execute(t_ctx *ctx, t_cmd *cmd);
 bool	exec_cmds(t_ctx *ctx);
+
+// exec_utils.c
+int		ft_close(int *fd);
+void	closetab(int count, int *fd_tab);
+void	free_tab(char **tab);
+bool	handle_redirection(t_ctx *ctx, t_cmd *cmd);
 
 // builtin.c
 t_bt_f	get_builtin(t_cmd *cmd);
+void	run_builtin(t_ctx *ctx, t_cmd *cmd);
+bool	exec_builtin_nofork(t_ctx *ctx, t_cmd *cmd);
 
 // bt_{debug_cmds,echo,cd,pwd,export,unset,env,exit}.c
 bool	bt_dbg_cmds(t_ctx *ctx, t_cmd *cmd);

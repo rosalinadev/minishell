@@ -6,7 +6,7 @@
 /*   By: rvandepu <rvandepu@student.42lehavre.fr>   +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/05 19:14:24 by rvandepu          #+#    #+#             */
-/*   Updated: 2024/12/07 22:42:16 by rvandepu         ###   ########.fr       */
+/*   Updated: 2024/12/08 17:00:51 by rvandepu         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,8 +24,6 @@ void	free_cmds(t_ctx *ctx)
 	ctx->cmds = NULL;
 }
 
-// TODO signals
-// TODO heredocs
 static bool	loop(t_ctx *ctx)
 {
 	char	*prompt;

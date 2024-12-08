@@ -6,7 +6,7 @@
 /*   By: rvandepu <rvandepu@student.42lehavre.fr>   +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/01 23:04:17 by rvandepu          #+#    #+#             */
-/*   Updated: 2024/12/07 22:51:42 by rvandepu         ###   ########.fr       */
+/*   Updated: 2024/12/08 16:01:40 by rvandepu         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -38,6 +38,7 @@ static bool	_init_extras(t_ctx *ctx)
 	char		*var;
 	int			n;
 	static char	ps1[] = "PS1=["SHELL_NAME"]$ ";
+	static char	ps2[] = "PS2=> ";
 
 	var = env_get(ctx->env, shlvl);
 	n = 0;
@@ -49,7 +50,8 @@ static bool	_init_extras(t_ctx *ctx)
 		n = 1;
 	}
 	ft_itoa_buf(n, shlvl + 6);
-	if (!env_set(&ctx->env, shlvl) || !env_set(&ctx->env, ps1))
+	if (!env_set(&ctx->env, shlvl) || !env_set(&ctx->env, ps1)
+		|| !env_set(&ctx->env, ps2))
 		return (eno(ctx, E_MEM), false);
 	return (true);
 }
