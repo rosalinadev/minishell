@@ -6,7 +6,7 @@
 /*   By: rvandepu <rvandepu@student.42lehavre.fr>   +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/05 19:14:24 by rvandepu          #+#    #+#             */
-/*   Updated: 2024/12/08 17:00:51 by rvandepu         ###   ########.fr       */
+/*   Updated: 2024/12/16 20:23:49 by rvandepu         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,8 +36,9 @@ static bool	loop(t_ctx *ctx)
 	cmdline = readline(prompt);
 	set_signals(S_IGNORE);
 	if (!cmdline)
-		return (ctx->should_exit = true);
-	add_history(cmdline);
+		return (ctx->should_exit = true, true);
+	if (*cmdline)
+		add_history(cmdline);
 	if (!parse_cmdline(ctx, cmdline, 0))
 		return (err_p_clear(SHELL_NAME": error during parsing", &ctx->err),
 			free(cmdline), true);
@@ -49,8 +50,7 @@ static bool	loop(t_ctx *ctx)
 		ctx->debug_hook(ctx);
 	if (ctx->cmd_count && !exec_cmds(ctx))
 		err_p_clear(SHELL_NAME": error during exec", &ctx->err);
-	free_cmds(ctx);
-	return (true);
+	return (free_cmds(ctx), true);
 }
 
 extern char	**environ;
@@ -62,6 +62,7 @@ int	main(void)
 
 	rl_outstream = stderr;
 	ctx = (t_ctx){.exitcode = EXIT_SUCCESS};
+	set_signals(S_IGNORE);
 	if (!env_init(&ctx, environ))
 		return (err_p(SHELL_NAME": error during init", &ctx.err), EXIT_FAILURE);
 	while (!ctx.should_exit)

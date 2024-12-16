@@ -6,7 +6,7 @@
 /*   By: rvandepu <rvandepu@student.42lehavre.fr>   +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/07 19:59:38 by rvandepu          #+#    #+#             */
-/*   Updated: 2024/12/08 17:19:45 by rvandepu         ###   ########.fr       */
+/*   Updated: 2024/12/16 20:15:54 by rvandepu         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,7 +33,6 @@ typedef enum e_setsig
 	S_INTERACTIVE,
 	S_HEREDOC,
 	S_IGNORE,
-	S_DEFAULT,
 }	t_setsig;
 
 # define EXIT_PARSER_FAILURE 2
@@ -138,6 +137,7 @@ typedef struct s_parser
 void	free_cmds(t_ctx *ctx);
 
 // signals.c
+extern int		g_last_sig;
 void	set_signals(t_setsig set);
 
 // error.c

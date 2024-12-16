@@ -6,13 +6,11 @@
 /*   By: rvandepu <rvandepu@student.42lehavre.fr>   +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/05 11:35:00 by rvandepu          #+#    #+#             */
-/*   Updated: 2024/12/08 15:59:21 by rvandepu         ###   ########.fr       */
+/*   Updated: 2024/12/16 20:08:47 by rvandepu         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
-
-extern int	g_last_sig;
 
 static bool	get_line(t_ctx *ctx, char **line)
 {
