@@ -6,7 +6,7 @@
 /*   By: ekoubbi <ekoubbi@student.42lehavre.fr>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/05 14:37:54 by ekoubbi           #+#    #+#             */
-/*   Updated: 2024/12/16 20:22:32 by rvandepu         ###   ########.fr       */
+/*   Updated: 2024/12/08 17:15:34 by rvandepu         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,8 +33,10 @@ static bool	_try_execve_path(t_ctx *ctx, t_cmd *cmd, char **env, int *errsv)
 			return (eno(ctx, E_MEM), free_tab(paths), false);
 		if (stat(command, &buf) == 0 && !S_ISDIR(buf.st_mode))
 		{
+			set_signals(S_DEFAULT);
 			execve(command, cmd->argv, env);
 			*errsv = errno;
+			set_signals(S_IGNORE);
 			enosv(ctx, E_EXECVE, *errsv);
 		}
 		free(command);
@@ -50,8 +52,10 @@ static bool	try_execve(t_ctx *ctx, t_cmd *cmd, char **env)
 	errsv = ENOENT;
 	if (ft_strchr(cmd->argv[0], '/') || env_get(ctx->env, "PATH") == NULL)
 	{
+		set_signals(S_DEFAULT);
 		execve(cmd->argv[0], cmd->argv, env);
 		errsv = errno;
+		set_signals(S_IGNORE);
 		enosv(ctx, E_EXECVE, errsv);
 		if (stat(cmd->argv[0], &buf) == 0 && S_ISDIR(buf.st_mode))
 			eno(ctx, E_CMD_IS_DIR);

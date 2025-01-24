@@ -6,7 +6,7 @@
 /*   By: rvandepu <rvandepu@student.42lehavre.fr>   +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/03 20:56:47 by rvandepu          #+#    #+#             */
-/*   Updated: 2024/12/16 20:27:28 by rvandepu         ###   ########.fr       */
+/*   Updated: 2024/12/08 11:10:05 by rvandepu         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,25 +28,30 @@ static void	save_sig(int sig)
 	g_last_sig = sig;
 }
 
-static void	ignore(int sig)
-{
-	(void)sig;
-}
-
 void	set_signals(t_setsig set)
 {
-	static bool	has_init = false;
-
-	if (!has_init)
-	{
-		sigaction(SIGQUIT, &(struct sigaction){.sa_handler = ignore}, NULL);
-		sigaction(SIGPIPE, &(struct sigaction){.sa_handler = ignore}, NULL);
-		has_init = true;
-	}
 	if (set == S_INTERACTIVE)
+	{
 		sigaction(SIGINT, &(struct sigaction){.sa_handler = int_handler}, NULL);
+		signal(SIGQUIT, SIG_IGN);
+		signal(SIGPIPE, SIG_IGN);
+	}
 	else if (set == S_HEREDOC)
+	{
 		sigaction(SIGINT, &(struct sigaction){.sa_handler = save_sig}, NULL);
+		signal(SIGQUIT, SIG_IGN);
+		signal(SIGPIPE, SIG_IGN);
+	}
 	else if (set == S_IGNORE)
-		sigaction(SIGINT, &(struct sigaction){.sa_handler = ignore}, NULL);
+	{
+		signal(SIGINT, SIG_IGN);
+		signal(SIGQUIT, SIG_IGN);
+		signal(SIGPIPE, SIG_IGN);
+	}
+	else if (set == S_DEFAULT)
+	{
+		signal(SIGINT, SIG_DFL);
+		signal(SIGQUIT, SIG_DFL);
+		signal(SIGPIPE, SIG_DFL);
+	}
 }
